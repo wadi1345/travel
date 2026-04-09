@@ -40,9 +40,9 @@
         .legend { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 12px; line-height: 1.5; }
         .legend span { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
 
-        /* 🔥 新增：計算機專屬樣式 */
+        /* 計算機專屬樣式 */
         .calc-screen { background: #fdfaf6; padding: 15px; text-align: right; font-size: 28px; font-weight: bold; border-radius: 10px; border: 1px solid #ffdece; margin-bottom: 5px; overflow-x: auto; color: #5a4b41; }
-        .calc-twd { text-align: right; color: #85b09a; font-size: 16px; margin-bottom: 15px; font-weight: bold; }
+        .calc-twd { text-align: right; color: #85b09a; font-size: 16px; margin-bottom: 15px; font-weight: bold; transition: all 0.2s; }
         .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
         .calc-btn { padding: 15px 0; font-size: 20px; background: #ffffff; border: 1px solid #ffdece; border-radius: 10px; color: #5a4b41; cursor: pointer; font-weight: bold; transition: 0.1s; }
         .calc-btn:active { background: #ffdece; transform: scale(0.95); }
@@ -219,7 +219,6 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- 標籤切換 ---
         function switchTab(tabId, btnElement) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -227,7 +226,6 @@
             btnElement.classList.add('active');
         }
 
-        // --- 地圖初始化與標記 ---
         const map = L.map('map').setView([38.2901, 140.9524], 11);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO' }).addTo(map);
 
@@ -297,7 +295,6 @@
         };
         legend.addTo(map);
 
-        // --- 行程表資料 ---
         const itineraryData = [
             { day: "Day 1 | 抵達 (5/17)", events: [
                 { time: "11:35 - 16:00", desc: `搭乘星宇出發，抵達 <span class="loc-link" onclick="focusMap('仙台機場')">仙台機場</span>` }, 
@@ -346,7 +343,7 @@
             itineraryList.innerHTML += dayHtml;
         });
 
-        // --- 🔥 計算機與分帳邏輯 ---
+        // --- 🔥 計算機即時連動邏輯 ---
         let calcExpr = "0";
         let currentJpy = 0;
 
@@ -357,6 +354,19 @@
                 calcExpr += val;
             }
             document.getElementById("calc-screen").innerText = calcExpr;
+
+            // 即時計算功能
+            try {
+                let evalString = calcExpr.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+                // 嘗試即時計算，如果還沒輸入完（例如 "100+"）就不會執行
+                let tempJpy = new Function('return ' + evalString)();
+                if (typeof tempJpy === 'number' && !isNaN(tempJpy) && isFinite(tempJpy)) {
+                    currentJpy = Math.round(tempJpy);
+                    calcUpdateTwd();
+                }
+            } catch (e) {
+                // 公式還沒輸入完時，保持上一個計算結果
+            }
         }
 
         function calcClear() {
@@ -368,11 +378,9 @@
 
         function calcEval() {
             try {
-                // 將畫面的符號轉為 JS 可計算的運算子
                 let evalString = calcExpr.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
-                // 安全的計算方式
                 currentJpy = new Function('return ' + evalString)();
-                currentJpy = Math.round(currentJpy); // 日幣通常不留小數
+                currentJpy = Math.round(currentJpy);
                 calcExpr = currentJpy.toString();
                 document.getElementById("calc-screen").innerText = calcExpr;
                 calcUpdateTwd();
