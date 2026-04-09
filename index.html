@@ -40,16 +40,17 @@
         .legend { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 12px; line-height: 1.5; }
         .legend span { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
 
-        /* 計算機專屬樣式 */
-        .calc-screen { background: #fdfaf6; padding: 15px; text-align: right; font-size: 28px; font-weight: bold; border-radius: 10px; border: 1px solid #ffdece; margin-bottom: 5px; overflow-x: auto; color: #5a4b41; }
+        /* 🔥 更新：標準版計算機樣式 */
+        .calc-screen { background: #fdfaf6; padding: 15px; text-align: right; font-size: 32px; font-weight: bold; border-radius: 10px; border: 1px solid #ffdece; margin-bottom: 5px; overflow-x: auto; color: #5a4b41; letter-spacing: 1px; }
         .calc-twd { text-align: right; color: #85b09a; font-size: 16px; margin-bottom: 15px; font-weight: bold; transition: all 0.2s; }
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .calc-btn { padding: 15px 0; font-size: 20px; background: #ffffff; border: 1px solid #ffdece; border-radius: 10px; color: #5a4b41; cursor: pointer; font-weight: bold; transition: 0.1s; }
-        .calc-btn:active { background: #ffdece; transform: scale(0.95); }
-        .calc-op { color: #e27d60; background: #fff9f2; }
-        .calc-eq { background: #e27d60; color: #ffffff; grid-column: span 2; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .calc-btn { padding: 16px 0; font-size: 20px; background: #ffffff; border: 1px solid #ffdece; border-radius: 12px; color: #5a4b41; cursor: pointer; font-weight: bold; transition: 0.1s; box-shadow: 0 2px 4px rgba(226, 125, 96, 0.05); }
+        .calc-btn:active { background: #ffdece; transform: translateY(2px); box-shadow: none; }
+        .calc-op { color: #e27d60; background: #fff9f2; font-size: 24px; }
+        .calc-eq { background: #e27d60; color: #ffffff; font-size: 24px; }
         .calc-eq:active { background: #c8684d; }
-        .calc-clear { color: #e8a87c; }
+        .calc-clear { color: #85b09a; background: #eef5f1; }
+        .calc-zero { grid-column: span 2; } /* 讓 0 鍵稍微寬一點 */
 
         /* 手機版響應式設計 */
         @media (max-width: 768px) {
@@ -58,6 +59,7 @@
             #sidebar { width: 100%; height: 55vh; border-left: none; border-top: 3px solid #ffdece; padding: 15px; }
             h1 { font-size: 20px; }
             .legend { font-size: 10px; padding: 5px; }
+            .calc-btn { padding: 14px 0; font-size: 18px; }
         }
     </style>
 </head>
@@ -169,7 +171,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <div class="card-title" style="border:none; margin:0; padding:0;">💴 匯率與分帳</div>
                     <div style="font-size: 13px; color: #888;">
-                        匯率: <input type="number" id="exchange-rate" value="0.215" step="0.001" style="width: 55px; border: 1px solid #ccc; border-radius: 4px; padding: 2px;" onchange="calcUpdateTwd()">
+                        匯率: <input type="number" id="exchange-rate" value="0.215" step="0.001" style="width: 55px; border: 1px solid #ccc; border-radius: 4px; padding: 2px;" onchange="calcUpdateScreen()">
                     </div>
                 </div>
                 
@@ -177,27 +179,29 @@
                 <div class="calc-twd" id="calc-twd">約 0 TWD</div>
                 
                 <div class="calc-grid">
-                    <button class="calc-btn calc-clear" onclick="calcClear()">C</button>
-                    <button class="calc-btn calc-op" onclick="calcInput('/')">÷</button>
-                    <button class="calc-btn calc-op" onclick="calcInput('*')">×</button>
-                    <button class="calc-btn calc-op" onclick="calcInput('-')">−</button>
+                    <button class="calc-btn calc-clear" onclick="inputClear()">C</button>
+                    <button class="calc-btn calc-clear" onclick="inputBackspace()">⌫</button>
+                    <button class="calc-btn calc-op" onclick="inputOperator('/')">÷</button>
+                    <button class="calc-btn calc-op" onclick="inputOperator('*')">×</button>
                     
-                    <button class="calc-btn" onclick="calcInput('7')">7</button>
-                    <button class="calc-btn" onclick="calcInput('8')">8</button>
-                    <button class="calc-btn" onclick="calcInput('9')">9</button>
-                    <button class="calc-btn calc-op" style="grid-row: span 2;" onclick="calcInput('+')">+</button>
+                    <button class="calc-btn" onclick="inputDigit('7')">7</button>
+                    <button class="calc-btn" onclick="inputDigit('8')">8</button>
+                    <button class="calc-btn" onclick="inputDigit('9')">9</button>
+                    <button class="calc-btn calc-op" onclick="inputOperator('-')">−</button>
                     
-                    <button class="calc-btn" onclick="calcInput('4')">4</button>
-                    <button class="calc-btn" onclick="calcInput('5')">5</button>
-                    <button class="calc-btn" onclick="calcInput('6')">6</button>
+                    <button class="calc-btn" onclick="inputDigit('4')">4</button>
+                    <button class="calc-btn" onclick="inputDigit('5')">5</button>
+                    <button class="calc-btn" onclick="inputDigit('6')">6</button>
+                    <button class="calc-btn calc-op" onclick="inputOperator('+')">+</button>
                     
-                    <button class="calc-btn" onclick="calcInput('1')">1</button>
-                    <button class="calc-btn" onclick="calcInput('2')">2</button>
-                    <button class="calc-btn" onclick="calcInput('3')">3</button>
-                    <button class="calc-btn calc-eq" style="grid-row: span 2;" onclick="calcEval()">=</button>
-                    
-                    <button class="calc-btn" style="grid-column: span 2;" onclick="calcInput('0')">0</button>
-                    <button class="calc-btn" onclick="calcInput('.')">.</button>
+                    <button class="calc-btn" onclick="inputDigit('1')">1</button>
+                    <button class="calc-btn" onclick="inputDigit('2')">2</button>
+                    <button class="calc-btn" onclick="inputDigit('3')">3</button>
+                    <button class="calc-btn calc-eq" onclick="inputEquals()">=</button>
+
+                    <button class="calc-btn calc-zero" onclick="inputDigit('0')">0</button>
+                    <button class="calc-btn" onclick="inputDigit('00')">00</button>
+                    <button class="calc-btn" onclick="inputDot()">.</button>
                 </div>
 
                 <div style="margin-top: 20px; border-top: 2px dashed #ffdece; padding-top: 15px;">
@@ -219,6 +223,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // --- 標籤切換與地圖邏輯維持不變 ---
         function switchTab(tabId, btnElement) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -286,11 +291,7 @@
         const legend = L.control({position: 'bottomright'});
         legend.onAdd = function () {
             const div = L.DomUtil.create('div', 'legend');
-            div.innerHTML = `
-                <span style="background:#85b09a;"></span> 景點<br>
-                <span style="background:#e27d60;"></span> 美食<br>
-                <span style="background:#c38eb4;"></span> 伴手禮
-            `;
+            div.innerHTML = `<span style="background:#85b09a;"></span> 景點<br><span style="background:#e27d60;"></span> 美食<br><span style="background:#c38eb4;"></span> 伴手禮`;
             return div;
         };
         legend.addTo(map);
@@ -343,72 +344,122 @@
             itineraryList.innerHTML += dayHtml;
         });
 
-        // --- 🔥 計算機即時連動邏輯 ---
-        let calcExpr = "0";
-        let currentJpy = 0;
+        // --- 🔥 升級版計算機大腦：狀態機邏輯 ---
+        let displayValue = '0';
+        let previousValue = null;
+        let currentOperator = null;
+        let waitingForNewValue = false;
+        let currentJpyForTwd = 0;
 
-        function calcInput(val) {
-            if (calcExpr === "0" && val !== ".") {
-                calcExpr = val;
+        function updateScreenDisplay() {
+            document.getElementById("calc-screen").innerText = displayValue;
+            currentJpyForTwd = parseFloat(displayValue) || 0;
+            calcUpdateScreen();
+        }
+
+        function inputDigit(digit) {
+            if (waitingForNewValue) {
+                displayValue = String(digit);
+                waitingForNewValue = false;
             } else {
-                calcExpr += val;
+                displayValue = displayValue === '0' && digit !== '00' ? String(digit) : displayValue + digit;
             }
-            document.getElementById("calc-screen").innerText = calcExpr;
-
-            // 即時計算功能
-            try {
-                let evalString = calcExpr.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
-                // 嘗試即時計算，如果還沒輸入完（例如 "100+"）就不會執行
-                let tempJpy = new Function('return ' + evalString)();
-                if (typeof tempJpy === 'number' && !isNaN(tempJpy) && isFinite(tempJpy)) {
-                    currentJpy = Math.round(tempJpy);
-                    calcUpdateTwd();
-                }
-            } catch (e) {
-                // 公式還沒輸入完時，保持上一個計算結果
-            }
+            updateScreenDisplay();
         }
 
-        function calcClear() {
-            calcExpr = "0";
-            currentJpy = 0;
-            document.getElementById("calc-screen").innerText = calcExpr;
-            calcUpdateTwd();
-        }
-
-        function calcEval() {
-            try {
-                let evalString = calcExpr.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
-                currentJpy = new Function('return ' + evalString)();
-                currentJpy = Math.round(currentJpy);
-                calcExpr = currentJpy.toString();
-                document.getElementById("calc-screen").innerText = calcExpr;
-                calcUpdateTwd();
-            } catch (e) {
-                document.getElementById("calc-screen").innerText = "格式錯誤";
-                setTimeout(calcClear, 1000);
+        function inputDot() {
+            if (waitingForNewValue) {
+                displayValue = '0.';
+                waitingForNewValue = false;
+                updateScreenDisplay();
+                return;
+            }
+            if (!displayValue.includes('.')) {
+                displayValue += '.';
+                updateScreenDisplay();
             }
         }
 
+        function inputBackspace() {
+            if (waitingForNewValue) return;
+            displayValue = displayValue.slice(0, -1);
+            if (displayValue === '') displayValue = '0';
+            updateScreenDisplay();
+        }
+
+        function inputClear() {
+            displayValue = '0';
+            previousValue = null;
+            currentOperator = null;
+            waitingForNewValue = false;
+            updateScreenDisplay();
+        }
+
+        function calculate(first, second, operator) {
+            if (operator === '+') return first + second;
+            if (operator === '-') return first - second;
+            if (operator === '*') return first * second;
+            if (operator === '/') return first / second;
+            return second;
+        }
+
+        // 🔥 這裡就是連加即時運算的魔法
+        function inputOperator(nextOperator) {
+            const inputValue = parseFloat(displayValue);
+
+            if (currentOperator && waitingForNewValue) {
+                // 如果連續按了不同的運算符號（例如按完 + 又按 -），只替換符號
+                currentOperator = nextOperator;
+                return;
+            }
+
+            if (previousValue == null) {
+                // 第一次輸入數字後按運算符號
+                previousValue = inputValue;
+            } else if (currentOperator) {
+                // 已經有前面的數字和符號了，先結算目前的結果！
+                const result = calculate(previousValue, inputValue, currentOperator);
+                // 處理 JS 浮點數誤差並取整數 (日幣通常不看小數)
+                displayValue = String(Math.round(result)); 
+                previousValue = result;
+                updateScreenDisplay();
+            }
+
+            waitingForNewValue = true;
+            currentOperator = nextOperator;
+        }
+
+        function inputEquals() {
+            if (!currentOperator || waitingForNewValue) return;
+            const inputValue = parseFloat(displayValue);
+            const result = calculate(previousValue, inputValue, currentOperator);
+            displayValue = String(Math.round(result));
+            previousValue = null;
+            currentOperator = null;
+            waitingForNewValue = true;
+            updateScreenDisplay();
+        }
+
+        // --- 分帳與台幣換算 ---
         function changePeople(amount) {
             let peopleInput = document.getElementById("split-people");
             let newVal = parseInt(peopleInput.value) + amount;
             if (newVal >= 1) {
                 peopleInput.value = newVal;
-                calcUpdateTwd();
+                calcUpdateScreen();
             }
         }
 
-        function calcUpdateTwd() {
+        function calcUpdateScreen() {
             const rate = parseFloat(document.getElementById("exchange-rate").value) || 0.215;
-            const twd = Math.round(currentJpy * rate);
+            const twd = Math.round(currentJpyForTwd * rate);
             document.getElementById("calc-twd").innerText = `約 ${twd} TWD`;
 
             const people = parseInt(document.getElementById("split-people").value) || 1;
             const splitDiv = document.getElementById("split-result");
             
-            if (people > 1 && currentJpy > 0) {
-                const splitJpy = Math.round(currentJpy / people);
+            if (people > 1 && currentJpyForTwd > 0) {
+                const splitJpy = Math.round(currentJpyForTwd / people);
                 const splitTwd = Math.round(twd / people);
                 splitDiv.innerHTML = `每人應付：<br><span style="font-size:20px;">${splitJpy} JPY</span><br><span style="font-size:14px; color:#888;">(約 ${splitTwd} TWD)</span>`;
                 splitDiv.style.display = "block";
