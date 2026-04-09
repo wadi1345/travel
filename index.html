@@ -33,7 +33,7 @@
         
         .time { font-weight: bold; color: #e8a87c; margin-right: 5px; }
         
-        /* 🔥 新增：可點擊的地標文字特效 */
+        /* 可點擊的地標文字特效 */
         .loc-link { 
             cursor: pointer; 
             color: #e27d60; 
@@ -185,7 +185,7 @@
 
         const icons = { general: createMarker('#85b09a'), food: createMarker('#e27d60'), gift: createMarker('#c38eb4') };
 
-        // 🔥 用來儲存地圖標記的物件，方便點擊時呼叫
+        // 用來儲存地圖標記的物件，方便點擊時呼叫
         const markersDb = {};
 
         const locations = [
@@ -229,17 +229,14 @@
             markersDb[loc.name] = marker;
         });
 
-        // 🔥 新增：地圖飛梭導航功能
+        // 地圖飛梭導航功能
         function focusMap(name) {
             const targetMarker = markersDb[name];
             if (targetMarker) {
-                // 手機版自動往上滾動到地圖
                 if (window.innerWidth <= 768) {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
-                // 地圖飛過去並放大 (16是放大倍率，數字越大越近)
                 map.flyTo(targetMarker.getLatLng(), 16, { duration: 1 });
-                // 打開該地點的資訊泡泡
                 targetMarker.openPopup();
             }
         }
@@ -256,35 +253,54 @@
         };
         legend.addTo(map);
 
-        // 行程表資料也加上 loc-link
+        // 完整版詳細行程表
         const itineraryData = [
             { day: "Day 1 | 抵達 (5/17)", events: [
-                { time: "11:35", desc: `搭乘星宇航空抵達 <span class="loc-link" onclick="focusMap('仙台機場')">仙台機場</span>` }, 
-                { time: "16:00", desc: `搭車前往 <span class="loc-link" onclick="focusMap('本鹽釜站')">本鹽釜站</span> Airbnb` }, 
-                { time: "18:30", desc: `晚餐：本鹽釜周邊海鮮` }] },
-            { day: "Day 2 | 歷史與夜景", events: [
-                { time: "09:00", desc: `<span class="loc-link" onclick="focusMap('仙台朝市')">仙台朝市</span>` }, 
-                { time: "11:00", desc: `<span class="loc-link" onclick="focusMap('瑞鳳殿')">瑞鳳殿</span>` }, 
-                { time: "12:00", desc: `<span class="loc-link" onclick="focusMap('青葉城跡')">青葉城跡</span>` }, 
-                { time: "17:30", desc: `<span class="loc-link" onclick="focusMap('伊達の牛たん本舗')">伊達の牛たん本舗</span>` }, 
-                { time: "19:15", desc: `<span class="loc-link" onclick="focusMap('AER 展望台')">AER 展望台夜景</span>` }] },
+                { time: "11:35 - 16:00", desc: `搭乘星宇航空 JX862 出發前往 <span class="loc-link" onclick="focusMap('仙台機場')">仙台機場</span> 並抵達` }, 
+                { time: "16:00 - 18:30", desc: `搭乘機場 Access 線至 <span class="loc-link" onclick="focusMap('仙台站')">仙台站</span>，轉乘至 <span class="loc-link" onclick="focusMap('本鹽釜站')">本鹽釜站</span> 後前往 Airbnb check-in` }, 
+                { time: "18:30 - 19:30", desc: `晚餐：本鹽釜站/鹽釜港周邊享用壽司或海鮮` }] },
+            { day: "Day 2 | 仙台市區歷史 + 朝市 + 夜景", events: [
+                { time: "09:00 - 10:30", desc: `<span class="loc-link" onclick="focusMap('仙台朝市')">仙台朝市</span>（品嚐海鮮丼）` }, 
+                { time: "11:00 - 11:40", desc: `<span class="loc-link" onclick="focusMap('瑞鳳殿')">瑞鳳殿</span>（搭乘 Loople 觀光巴士）` }, 
+                { time: "12:00 - 12:50", desc: `<span class="loc-link" onclick="focusMap('青葉城跡')">青葉城跡</span>` }, 
+                { time: "13:00 - 13:45", desc: `午餐時間：青葉城跡旁輕食或毛豆泥麻糬` }, 
+                { time: "14:15 - 15:00", desc: `<span class="loc-link" onclick="focusMap('大崎八幡宮')">大崎八幡宮</span>` }, 
+                { time: "15:30 - 17:30", desc: `市區自由活動（Loft / PARCO / 仙台站周邊）` }, 
+                { time: "17:30 - 19:00", desc: `晚餐：<span class="loc-link" onclick="focusMap('伊達の牛たん本舗')">伊達の牛たん本舗</span>（厚切牛舌）` }, 
+                { time: "19:15 - 20:00", desc: `<span class="loc-link" onclick="focusMap('AER 展望台')">AER 展望台</span> 欣賞百萬夜景` }, 
+                { time: "20:00 之後", desc: `國分町或 <span class="loc-link" onclick="focusMap('仙台站')">仙台站</span> 周邊隨意逛` }] },
             { day: "Day 3 | 松島一日遊", events: [
-                { time: "10:00", desc: `<span class="loc-link" onclick="focusMap('五大堂 / 福浦橋')">五大堂與福浦橋</span>` }, 
-                { time: "11:15", desc: `<span class="loc-link" onclick="focusMap('松島魚市場')">松島魚市場</span>` }, 
-                { time: "13:00", desc: `<span class="loc-link" onclick="focusMap('松島蒲鉾本舗')">松島蒲鉾本舗</span> 魚板 DIY` }, 
-                { time: "16:00", desc: `<span class="loc-link" onclick="focusMap('SEIYU (西友) 鹽釜店')">SEIYU 超市</span> 採買` }] },
-            { day: "Day 4 | 動物園與清酒", events: [
-                { time: "10:00", desc: `<span class="loc-link" onclick="focusMap('八木山動物公園')">八木山動物公園</span>` }, 
-                { time: "15:30", desc: `<span class="loc-link" onclick="focusMap('浦霞 酒Gallery')">浦霞 酒Gallery</span>` }, 
-                { time: "17:30", desc: `晚餐：<span class="loc-link" onclick="focusMap('すし哲本店')">鹽釜在地壽司店</span>` }] },
-            { day: "Day 5 | 水族館與購物", events: [
-                { time: "09:20", desc: `<span class="loc-link" onclick="focusMap('Kirin Beer Port 仙台')">麒麟啤酒工廠</span>` }, 
-                { time: "13:15", desc: `<span class="loc-link" onclick="focusMap('仙台うみの杜水族館')">仙台うみの杜水族館</span>` }, 
-                { time: "16:15", desc: `<span class="loc-link" onclick="focusMap('MITSUI OUTLET PARK')">MITSUI OUTLET</span> 購物` }] },
-            { day: "Day 6 | 賦歸 (5/22)", events: [
-                { time: "10:00", desc: `<span class="loc-link" onclick="focusMap('仙台站')">仙台站</span> 周邊最後採買` }, 
-                { time: "14:30", desc: `前往 <span class="loc-link" onclick="focusMap('仙台機場')">仙台機場</span>` }, 
-                { time: "17:20", desc: `班機起飛` }] }
+                { time: "09:30 - 09:45", desc: `搭乘仙石線：本鹽釜站 → 松島海岸站` }, 
+                { time: "10:00 - 11:00", desc: `<span class="loc-link" onclick="focusMap('五大堂 / 福浦橋')">福浦橋（相遇之橋）與五大堂</span> 散策` }, 
+                { time: "11:15 - 12:45", desc: `午餐：<span class="loc-link" onclick="focusMap('松島魚市場')">松島魚市場</span>（海鮮丼、烤牡蠣）` }, 
+                { time: "13:00 - 13:30", desc: `魚板 DIY 體驗（<span class="loc-link" onclick="focusMap('松島蒲鉾本舗')">松島蒲鉾本舗</span>）` }, 
+                { time: "13:30 - 14:30", desc: `松島海岸老街吃美食（推薦 <span class="loc-link" onclick="focusMap('Pensee (パンセ)')">Pensee 牡蠣咖哩麵包</span>）` }, 
+                { time: "14:45 - 15:30", desc: `<span class="loc-link" onclick="focusMap('觀瀾亭')">觀瀾亭</span> 享用抹茶套餐與海景` }, 
+                { time: "15:45 - 16:00", desc: `松島海岸站 → 本鹽釜站` }, 
+                { time: "16:00 - 17:00", desc: `<span class="loc-link" onclick="focusMap('SEIYU (西友) 鹽釜店')">SEIYU (西友) 鹽釜店</span> 採買和牛與生鮮` }, 
+                { time: "18:00 之後", desc: `民宿火鍋大餐` }] },
+            { day: "Day 4 | 動物園 + 清酒體驗", events: [
+                { time: "09:00 - 10:00", desc: `本鹽釜站 → 仙台站 → <span class="loc-link" onclick="focusMap('八木山動物公園')">八木山動物公園</span>` }, 
+                { time: "10:00 - 13:00", desc: `<span class="loc-link" onclick="focusMap('八木山動物公園')">八木山動物公園</span>` }, 
+                { time: "13:00 - 14:30", desc: `午餐：仙台站內牛舌通/壽司通，隨後搭車回本鹽釜` }, 
+                { time: "15:30 - 16:45", desc: `<span class="loc-link" onclick="focusMap('浦霞 酒Gallery')">浦霞 酒Gallery</span> 了解釀造歷史與清酒試飲` }, 
+                { time: "17:30 之後", desc: `晚餐：鹽釜在地壽司店（如 <span class="loc-link" onclick="focusMap('すし哲本店')">すし哲</span> 等），或買回民宿自煮` }] },
+            { day: "Day 5 | 啤酒 × 水族館 × OUTLET 一日遊", events: [
+                { time: "09:00 - 09:10", desc: `本鹽釜站 → 多賀城站` }, 
+                { time: "09:20 - 11:30", desc: `搭接駁車至麒麟啤酒 (KIRIN) 仙台工廠參觀與試飲` }, 
+                { time: "11:30 - 13:00", desc: `午餐：<span class="loc-link" onclick="focusMap('Kirin Beer Port 仙台')">Kirin Beer Port 仙台</span> (工廠附設餐廳)` }, 
+                { time: "13:15 - 16:15", desc: `步行前往 <span class="loc-link" onclick="focusMap('仙台うみの杜水族館')">仙台うみの杜水族館</span>` }, 
+                { time: "16:15 - 18:30", desc: `步行前往 <span class="loc-link" onclick="focusMap('MITSUI OUTLET PARK')">MITSUI OUTLET PARK</span> 仙台港購物` }, 
+                { time: "18:30 - 19:30", desc: `晚餐：OUTLET 內或周邊餐廳` }, 
+                { time: "19:30 - 19:45", desc: `中野榮站 → 本鹽釜站休息` }] },
+            { day: "Day 6 | 市區購物 → 機場", events: [
+                { time: "07:30 - 09:00", desc: `民宿早餐、整理行李與退房` }, 
+                { time: "09:30 - 10:00", desc: `本鹽釜站 → <span class="loc-link" onclick="focusMap('仙台站')">仙台站</span>（行李放置物櫃）` }, 
+                { time: "10:00 - 13:00", desc: `<span class="loc-link" onclick="focusMap('仙台站')">仙台站</span> 周邊購物與採買伴手禮` }, 
+                { time: "13:00 - 14:30", desc: `午餐時間` }, 
+                { time: "14:30 - 15:00", desc: `搭乘機場線抵達 <span class="loc-link" onclick="focusMap('仙台機場')">仙台機場</span>` }, 
+                { time: "15:00 - 17:00", desc: `辦理登機手續、免稅店最後採買` }, 
+                { time: "17:20", desc: `班機起飛返台` }] }
         ];
 
         const itineraryList = document.getElementById('itinerary-list');
