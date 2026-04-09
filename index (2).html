@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 仙台六日遊專屬地圖</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* 網頁的基本溫暖可愛風格設定 */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            font-family: 'Helvetica Neue', Arial, 'Noto Sans TC', sans-serif;
+            background-color: #fdfaf6; /* 溫暖的米白色背景 */
+            color: #5a4b41; /* 柔和的深咖啡色字體 */
+        }
+        
+        /* 左側地圖區塊 */
+        #map {
+            width: 60%;
+            height: 100%;
+        }
+
+        /* 右側行程區塊 */
+        #sidebar {
+            width: 40%;
+            height: 100%;
+            overflow-y: auto;
+            padding: 30px;
+            box-sizing: border-box;
+            background-color: #fff9f2;
+            border-left: 3px solid #ffdece; /* 柔和的橘粉色邊框 */
+        }
+
+        h1 {
+            color: #e27d60; /* 溫暖的鮭魚粉色標題 */
+            font-size: 24px;
+            margin-top: 0;
+            border-bottom: 2px dashed #ffdece;
+            padding-bottom: 15px;
+        }
+
+        .day-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(226, 125, 96, 0.1); /* 淡淡的粉色陰影 */
+            transition: transform 0.2s;
+        }
+
+        .day-container:hover {
+            transform: translateY(-2px);
+        }
+
+        .day-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #85b09a; /* 清新的灰綠色 */
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        li::before {
+            content: "🐾"; /* 可愛的小腳印裝飾 */
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 12px;
+        }
+        
+        .time {
+            font-weight: bold;
+            color: #e8a87c; /* 溫暖的焦糖色 */
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <div id="sidebar">
+        <h1>🌸 5/17~5/22 東北仙台之旅</h1>
+        <p style="font-size: 14px; color: #999;">點擊左側地圖標記，可以查看景點名稱喔！</p>
+        
+        <div id="itinerary"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // 初始化地圖，中心點設定在仙台車站附近
+        const map = L.map('map').setView([38.2601, 140.8824], 11);
+
+        // 使用免費開源的 OpenStreetMap 圖資
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // 幫你標記的重要景點座標資料庫
+        const locations = [
+            { name: "仙台機場", lat: 38.1397, lng: 140.9170, day: "Day 1 & 6" },
+            { name: "仙台站", lat: 38.2601, lng: 140.8824, day: "多日必經" },
+            { name: "本鹽釜站 (住宿區)", lat: 38.3175, lng: 141.0211, day: "每日起點" },
+            { name: "仙台朝市", lat: 38.2584, lng: 140.8789, day: "Day 2" },
+            { name: "瑞鳳殿", lat: 38.2515, lng: 140.8676, day: "Day 2" },
+            { name: "青葉城跡", lat: 38.2526, lng: 140.8543, day: "Day 2" },
+            { name: "松島海岸 (五大堂/福浦橋)", lat: 38.3686, lng: 141.0594, day: "Day 3" },
+            { name: "八木山動物公園", lat: 38.2447, lng: 140.8385, day: "Day 4" },
+            { name: "麒麟啤酒仙台工廠", lat: 38.2758, lng: 140.9934, day: "Day 5" },
+            { name: "仙台うみの杜水族館", lat: 38.2721, lng: 140.9855, day: "Day 5" },
+            { name: "MITSUI OUTLET PARK 仙台港", lat: 38.2711, lng: 140.9996, day: "Day 5" }
+        ];
+
+        // 將地標加到地圖上
+        locations.forEach(loc => {
+            L.marker([loc.lat, loc.lng]).addTo(map)
+                .bindPopup(`<b>${loc.name}</b><br>${loc.day}`);
+        });
+
+        // 你的詳細行程資料
+        const itineraryData = [
+            {
+                day: "Day 1 | 抵達 (5/17)",
+                events: [
+                    { time: "11:35 - 16:00", desc: "搭乘星宇航空 JX862 抵達仙台" },
+                    { time: "16:00 - 18:30", desc: "搭乘 Access 線至仙台站，轉乘至鹽釜站前往 Airbnb" },
+                    { time: "18:30 - 19:30", desc: "晚餐：鹽釜港/本鹽釜站周邊享用壽司或海鮮" }
+                ]
+            },
+            {
+                day: "Day 2 | 仙台市區歷史 + 朝市 + 夜景",
+                events: [
+                    { time: "09:00 - 10:30", desc: "仙台朝市（品嚐海鮮丼）" },
+                    { time: "11:00 - 11:40", desc: "瑞鳳殿（搭乘觀光巴士）" },
+                    { time: "12:00 - 12:50", desc: "青葉城跡" },
+                    { time: "15:30 - 17:30", desc: "市區自由活動（Loft / PARCO / 仙台站周邊）" },
+                    { time: "17:30 - 19:00", desc: "晚餐：伊達の牛たん本舗（厚切牛舌）" },
+                    { time: "19:15 - 20:00", desc: "AER 展望台欣賞百萬夜景" }
+                ]
+            },
+            {
+                day: "Day 3 | 松島一日遊",
+                events: [
+                    { time: "10:00 - 11:00", desc: "福浦橋與五大堂散策" },
+                    { time: "11:15 - 12:45", desc: "午餐：松島魚市場" },
+                    { time: "13:00 - 13:30", desc: "魚板 DIY 體驗（松島蒲鉾本舗）" },
+                    { time: "14:45 - 15:30", desc: "觀瀾亭享用抹茶套餐與海景" },
+                    { time: "16:00 - 17:00", desc: "SEIYU (西友) 鹽釜店採買和牛" },
+                    { time: "18:00 之後", desc: "民宿火鍋大餐" }
+                ]
+            },
+            {
+                day: "Day 4 | 動物園 + 清酒體驗",
+                events: [
+                    { time: "10:00 - 13:00", desc: "八木山動物公園" },
+                    { time: "13:00 - 14:30", desc: "午餐：仙台站內牛舌通/壽司通" },
+                    { time: "15:30 - 16:45", desc: "浦霞 酒Gallery 了解釀造歷史與清酒試飲" },
+                    { time: "17:30 之後", desc: "晚餐：鹽釜在地壽司店或自煮" }
+                ]
+            },
+            {
+                day: "Day 5 | 啤酒 × 水族館 × OUTLET",
+                events: [
+                    { time: "09:20 - 11:30", desc: "麒麟啤酒 (KIRIN) 仙台工廠參觀與試飲" },
+                    { time: "13:15 - 16:15", desc: "仙台うみの杜水族館" },
+                    { time: "16:15 - 18:30", desc: "MITSUI OUTLET PARK 仙台港購物" },
+                    { time: "18:30 - 19:30", desc: "晚餐：OUTLET 內或周邊餐廳" }
+                ]
+            },
+            {
+                day: "Day 6 | 市區購物 → 機場",
+                events: [
+                    { time: "10:00 - 13:00", desc: "仙台站周邊購物與採買伴手禮" },
+                    { time: "14:30 - 15:00", desc: "搭乘仙台機場線抵達機場" },
+                    { time: "17:20", desc: "班機起飛返台" }
+                ]
+            }
+        ];
+
+        // 將行程自動生成到網頁右側
+        const itineraryContainer = document.getElementById('itinerary');
+        itineraryData.forEach(dayInfo => {
+            let dayHtml = `<div class="day-container">
+                               <div class="day-title">${dayInfo.day}</div>
+                               <ul>`;
+            dayInfo.events.forEach(event => {
+                dayHtml += `<li><span class="time">${event.time}</span> ${event.desc}</li>`;
+            });
+            dayHtml += `</ul></div>`;
+            itineraryContainer.innerHTML += dayHtml;
+        });
+    </script>
+</body>
+</html>
