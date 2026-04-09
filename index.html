@@ -15,81 +15,42 @@
             font-family: 'Helvetica Neue', Arial, 'Noto Sans TC', sans-serif;
             background-color: #fdfaf6;
             color: #5a4b41;
-            /* 預設為電腦版的左右排列 */
             flex-direction: row; 
         }
         
-        #map {
-            width: 60%;
-            height: 100%;
-        }
+        #map { width: 60%; height: 100%; }
 
         #sidebar {
-            width: 40%;
-            height: 100%;
-            overflow-y: auto;
-            padding: 30px;
-            box-sizing: border-box;
-            background-color: #fff9f2;
-            border-left: 3px solid #ffdece;
+            width: 40%; height: 100%; overflow-y: auto; padding: 30px;
+            box-sizing: border-box; background-color: #fff9f2; border-left: 3px solid #ffdece;
         }
 
-        h1 {
-            color: #e27d60;
-            font-size: 24px;
-            margin-top: 0;
-            margin-bottom: 15px;
-            text-align: center;
-        }
+        h1 { color: #e27d60; font-size: 24px; margin-top: 0; margin-bottom: 15px; text-align: center; }
 
-        /* 標籤頁按鈕區塊 */
         .tabs {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            border-bottom: 2px dashed #ffdece;
-            padding-bottom: 10px;
-            /* 讓手機版標籤過多時可以左右滑動 */
-            overflow-x: auto;
-            white-space: nowrap;
+            display: flex; justify-content: space-between; margin-bottom: 20px;
+            border-bottom: 2px dashed #ffdece; padding-bottom: 10px;
+            overflow-x: auto; white-space: nowrap;
         }
 
         .tab-btn {
-            background-color: transparent;
-            border: none;
-            color: #bfa696;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-            flex-shrink: 0; /* 避免手機版按鈕被壓縮 */
+            background-color: transparent; border: none; color: #bfa696; font-size: 15px;
+            font-weight: bold; cursor: pointer; padding: 8px 12px; border-radius: 20px;
+            transition: all 0.3s ease; flex-shrink: 0;
         }
 
-        .tab-btn:hover {
-            background-color: #ffdece;
-            color: #5a4b41;
-        }
+        .tab-btn:hover { background-color: #ffdece; color: #5a4b41; }
+        .tab-btn.active { background-color: #e27d60; color: white; box-shadow: 0 2px 8px rgba(226, 125, 96, 0.3); }
 
-        .tab-btn.active {
-            background-color: #e27d60;
-            color: white;
-            box-shadow: 0 2px 8px rgba(226, 125, 96, 0.3);
-        }
-
-        /* 標籤頁內容區塊 */
         .tab-content { display: none; animation: fadeIn 0.4s; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 卡片與清單風格 */
         .card { background-color: #ffffff; border-radius: 15px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(226, 125, 96, 0.1); }
         .card-title { font-size: 18px; font-weight: bold; color: #85b09a; margin-bottom: 10px; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; }
         ul { list-style-type: none; padding: 0; margin: 0; }
         li { font-size: 14px; line-height: 1.6; margin-bottom: 8px; padding-left: 20px; position: relative; }
 
-        /* 自訂列表圖標 */
         .paw-list li::before { content: "🐾"; position: absolute; left: 0; top: 0; font-size: 12px; }
         .star-list li::before { content: "✨"; position: absolute; left: 0; top: 0; font-size: 12px; }
         .check-list li::before { content: "✅"; position: absolute; left: 0; top: 0; font-size: 12px; }
@@ -97,33 +58,16 @@
         .time { font-weight: bold; color: #e8a87c; margin-right: 5px; }
         .highlight { color: #e27d60; font-weight: bold; }
 
-        /* 地圖圖例 */
         .legend { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 12px; line-height: 1.5; }
         .legend span { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
 
-        /* 📱 手機版專屬魔法設定 (當螢幕寬度小於 768px 時觸發) */
+        /* 手機版響應式設計 */
         @media (max-width: 768px) {
-            body {
-                flex-direction: column; /* 改為上下排列 */
-            }
-            #map {
-                width: 100%;
-                height: 45vh; /* 地圖佔據畫面上半部 45% */
-            }
-            #sidebar {
-                width: 100%;
-                height: 55vh; /* 資訊欄佔據畫面下半部 55% */
-                border-left: none; /* 移除左邊界線 */
-                border-top: 3px solid #ffdece; /* 改為上邊界線 */
-                padding: 15px; /* 縮小手機版的留白空間 */
-            }
-            h1 {
-                font-size: 20px; /* 標題稍微縮小 */
-            }
-            .legend {
-                font-size: 10px; /* 圖例縮小以免擋住太多地圖 */
-                padding: 5px;
-            }
+            body { flex-direction: column; }
+            #map { width: 100%; height: 45vh; }
+            #sidebar { width: 100%; height: 55vh; border-left: none; border-top: 3px solid #ffdece; padding: 15px; }
+            h1 { font-size: 20px; }
+            .legend { font-size: 10px; padding: 5px; }
         }
     </style>
 </head>
@@ -142,7 +86,7 @@
         </div>
 
         <div id="itinerary-tab" class="tab-content active">
-            <p style="font-size: 13px; color: #999; text-align: center; margin-top: 0;">點擊地圖彩色標記，查看位置喔！</p>
+            <p style="font-size: 13px; color: #999; text-align: center; margin-top: 0;">點擊地圖彩色標記，查看店家位置喔！</p>
             <div id="itinerary-list"></div>
         </div>
 
@@ -152,7 +96,7 @@
                 <ul class="check-list">
                     <li><b>護照：</b> 效期需在6個月以上。</li>
                     <li><b>數位入境碼：</b> 提前填寫好 Visit Japan Web 並截圖。</li>
-                    <li><b>機票與住宿憑證：</b> 星宇航空電子機票、Airbnb 入住資訊。</li>
+                    <li><b>機票與住宿：</b> 星宇航空電子機票、Airbnb 入住資訊。</li>
                 </ul>
             </div>
             <div class="card">
@@ -187,7 +131,7 @@
                 <ul class="star-list">
                     <li><span class="highlight">すし哲本店：</span> 殿堂級名店，大目鮪魚極度推薦。</li>
                     <li><span class="highlight">鮨しらはた：</span> 緊鄰すし哲，食材處理細膩。</li>
-                    <li><span class="highlight">廻鮮寿司塩釜港：</span> 東北最強迴轉壽司，魚料厚實。</li>
+                    <li><span class="highlight">廻鮮寿司塩釜港：</span> 東北最強迴轉壽司(Marine Gate店)。</li>
                     <li><span class="highlight">亀喜寿司：</span> 老字號頂級壽司備案。</li>
                 </ul>
             </div>
@@ -224,10 +168,10 @@
                 <div class="card-title">🍘 鹹食與限定零嘴</div>
                 <ul class="star-list">
                     <li><span class="highlight">牛舌相關製品：</span> 牛舌仙貝、牛舌柿種米果。</li>
-                    <li><span class="highlight">笹蒲鉾 (竹葉魚板)：</span> 仙台在地經典魚板。</li>
+                    <li><span class="highlight">松島蒲鉾本舗：</span> 仙台在地經典魚板。</li>
                     <li><span class="highlight">KitKat 毛豆奶昔口味：</span> 仙台限定版。</li>
                     <li><span class="highlight">Saichi 牡丹餅巧克力棒：</span> 脆皮內包紅豆巧克力。</li>
-                    <li><span class="highlight">浦霞 純米大吟釀：</span> 鹽釜酒造限定酒款。</li>
+                    <li><span class="highlight">浦霞 酒Gallery：</span> 鹽釜在地酒造限定酒款。</li>
                 </ul>
             </div>
         </div>
@@ -253,29 +197,47 @@
         };
 
         const icons = {
-            general: createMarker('#85b09a'), // 綠色 - 景點
-            food: createMarker('#e27d60'),    // 橘色 - 美食
-            gift: createMarker('#c38eb4')     // 紫色 - 伴手禮
+            general: createMarker('#85b09a'), // 綠色 - 景點/交通
+            food: createMarker('#e27d60'),    // 橘色 - 美食店家
+            gift: createMarker('#c38eb4')     // 紫色 - 伴手禮店家
         };
 
+        // 詳細座標資料庫，包含所有具體推薦店家
         const locations = [
-            { name: "仙台機場", lat: 38.1397, lng: 140.9170, type: "general", desc: "Day 1 & 6" },
-            { name: "本鹽釜站 (住宿區)", lat: 38.3175, lng: 141.0211, type: "general", desc: "每日起點" },
+            // 🟢 一般景點與交通
+            { name: "仙台機場", lat: 38.1397, lng: 140.9170, type: "general", desc: "Day 1 & 6 班機起降" },
+            { name: "本鹽釜站", lat: 38.3175, lng: 141.0211, type: "general", desc: "每日起點與轉乘" },
+            { name: "仙台站", lat: 38.2601, lng: 140.8824, type: "general", desc: "交通與購物樞紐" },
             { name: "瑞鳳殿", lat: 38.2515, lng: 140.8676, type: "general", desc: "歷史巡禮" },
-            { name: "青葉城跡", lat: 38.2526, lng: 140.8543, type: "general", desc: "伊達政宗銅像" },
-            { name: "松島海岸", lat: 38.3686, lng: 141.0594, type: "general", desc: "日本三景" },
-            { name: "八木山動物公園", lat: 38.2447, lng: 140.8385, type: "general", desc: "Day 4" },
-            { name: "仙台水族館", lat: 38.2721, lng: 140.9855, type: "general", desc: "Day 5" },
-            { name: "すし哲本店 / 鮨しらはた", lat: 38.3185, lng: 141.0230, type: "food", desc: "殿堂級在地壽司" },
-            { name: "廻鮮寿司塩釜港 / BLAIR MARINA", lat: 38.3180, lng: 141.0285, type: "food", desc: "Marine Gate 鹽釜內" },
-            { name: "炭火焼肉 まさにく", lat: 38.3160, lng: 141.0205, type: "food", desc: "黑毛和牛燒肉" },
-            { name: "仙台朝市", lat: 38.2584, lng: 140.8789, type: "food", desc: "豐盛海鮮丼" },
-            { name: "伊達の牛たん本舗", lat: 38.2615, lng: 140.8810, type: "food", desc: "厚切牛舌" },
-            { name: "松島魚市場 / Pensee麵包", lat: 38.3710, lng: 141.0620, type: "food", desc: "現烤牡蠣與咖哩麵包" },
-            { name: "Kirin Beer Port 仙台", lat: 38.2758, lng: 140.9934, type: "food", desc: "麒麟啤酒廠與烤羊肉" },
-            { name: "仙台站", lat: 38.2601, lng: 140.8824, type: "gift", desc: "萩之月/喜久福/牛舌餅" },
-            { name: "浦霞 酒Gallery", lat: 38.3165, lng: 141.0185, type: "gift", desc: "在地純米大吟釀" },
-            { name: "OUTLET 仙台港", lat: 38.2711, lng: 140.9996, type: "gift", desc: "大型血拼採購" }
+            { name: "青葉城跡", lat: 38.2526, lng: 140.8543, type: "general", desc: "伊達政宗騎馬銅像" },
+            { name: "大崎八幡宮", lat: 38.2714, lng: 140.8451, type: "general", desc: "國寶級神社" },
+            { name: "AER 展望台", lat: 38.2625, lng: 140.8815, type: "general", desc: "百萬市區夜景" },
+            { name: "五大堂 / 福浦橋", lat: 38.3686, lng: 141.0594, type: "general", desc: "日本三景散策" },
+            { name: "觀瀾亭", lat: 38.3692, lng: 141.0601, type: "general", desc: "賞海景吃抹茶" },
+            { name: "八木山動物公園", lat: 38.2447, lng: 140.8385, type: "general", desc: "看浣熊與北極熊" },
+            { name: "仙台うみの杜水族館", lat: 38.2721, lng: 140.9855, type: "general", desc: "海豚海獅表演" },
+            { name: "SEIYU (西友) 鹽釜店", lat: 38.3168, lng: 141.0225, type: "general", desc: "採買和牛與生鮮" },
+
+            // 🟠 具體美食餐廳
+            { name: "すし哲本店", lat: 38.3182, lng: 141.0225, type: "food", desc: "殿堂級壽司！必吃大目鮪魚" },
+            { name: "鮨しらはた", lat: 38.3184, lng: 141.0223, type: "food", desc: "細膩壽司，搭日本酒絕配" },
+            { name: "廻鮮寿司塩釜港", lat: 38.3180, lng: 141.0285, type: "food", desc: "東北最強迴轉壽司(Marine Gate內)" },
+            { name: "亀喜寿司", lat: 38.3150, lng: 141.0230, type: "food", desc: "老字號精緻壽司" },
+            { name: "炭火焼肉 まさにく", lat: 38.3160, lng: 141.0205, type: "food", desc: "大口吃黑毛和牛與牛舌" },
+            { name: "まるきた", lat: 38.3165, lng: 141.0210, type: "food", desc: "在地海鮮居酒屋(週日有開)" },
+            { name: "Trattoria BLAIR MARINA", lat: 38.3178, lng: 141.0283, type: "food", desc: "義式海鮮料理與港口夜景" },
+            { name: "仙台朝市", lat: 38.2584, lng: 140.8789, type: "food", desc: "在地廚房，必吃豐盛海鮮丼" },
+            { name: "伊達の牛たん本舗", lat: 38.2615, lng: 140.8810, type: "food", desc: "厚切極致芯牛舌(仙台站前)" },
+            { name: "松島魚市場", lat: 38.3713, lng: 141.0628, type: "food", desc: "產地直送料理與現烤牡蠣" },
+            { name: "Pensee (パンセ)", lat: 38.3700, lng: 141.0615, type: "food", desc: "老街必買牡蠣咖哩麵包" },
+            { name: "Kirin Beer Port 仙台", lat: 38.2758, lng: 140.9934, type: "food", desc: "啤酒工廠直營，吃成吉思汗烤羊肉" },
+
+            // 🟣 具體伴手禮購買地
+            { name: "菓匠三全 (萩之月)", lat: 38.2605, lng: 140.8820, type: "gift", desc: "仙台第一經典名菓(仙台站內)" },
+            { name: "ずんだ茶寮 / 喜久水庵", lat: 38.2608, lng: 140.8826, type: "gift", desc: "毛豆奶昔與大福(仙台站內)" },
+            { name: "松島蒲鉾本舗", lat: 38.3705, lng: 141.0610, type: "gift", desc: "現烤竹葉魚板DIY體驗" },
+            { name: "浦霞 酒Gallery", lat: 38.3168, lng: 141.0187, type: "gift", desc: "試飲買酒！在地純米大吟釀" },
+            { name: "MITSUI OUTLET PARK", lat: 38.2711, lng: 140.9996, type: "gift", desc: "東北最大血拼採購天地" }
         ];
 
         locations.forEach(loc => {
@@ -287,9 +249,9 @@
         legend.onAdd = function () {
             const div = L.DomUtil.create('div', 'legend');
             div.innerHTML = `
-                <span style="background:#85b09a;"></span> 景點<br>
-                <span style="background:#e27d60;"></span> 美食<br>
-                <span style="background:#c38eb4;"></span> 伴手禮
+                <span style="background:#85b09a;"></span> 景點與交通<br>
+                <span style="background:#e27d60;"></span> 美食店家<br>
+                <span style="background:#c38eb4;"></span> 伴手禮名店
             `;
             return div;
         };
@@ -298,7 +260,7 @@
         const itineraryData = [
             { day: "Day 1 | 抵達 (5/17)", events: [{ time: "11:35", desc: "搭乘星宇航空抵達" }, { time: "16:00", desc: "搭車前往鹽釜 Airbnb" }, { time: "18:30", desc: "晚餐：本鹽釜周邊海鮮" }] },
             { day: "Day 2 | 歷史與夜景", events: [{ time: "09:00", desc: "仙台朝市" }, { time: "11:00", desc: "瑞鳳殿" }, { time: "12:00", desc: "青葉城跡" }, { time: "17:30", desc: "伊達の牛たん本舗" }, { time: "19:15", desc: "AER 展望台夜景" }] },
-            { day: "Day 3 | 松島一日遊", events: [{ time: "10:00", desc: "五大堂與福浦橋" }, { time: "11:15", desc: "松島魚市場" }, { time: "13:00", desc: "魚板 DIY 體驗" }, { time: "16:00", desc: "SEIYU 超市採買和牛" }] },
+            { day: "Day 3 | 松島一日遊", events: [{ time: "10:00", desc: "五大堂與福浦橋" }, { time: "11:15", desc: "松島魚市場" }, { time: "13:00", desc: "魚板 DIY 體驗" }, { time: "16:00", desc: "SEIYU 超市採買" }] },
             { day: "Day 4 | 動物園與清酒", events: [{ time: "10:00", desc: "八木山動物公園" }, { time: "15:30", desc: "浦霞 酒Gallery" }, { time: "17:30", desc: "晚餐：鹽釜在地壽司店" }] },
             { day: "Day 5 | 水族館與購物", events: [{ time: "09:20", desc: "麒麟啤酒工廠" }, { time: "13:15", desc: "仙台うみの杜水族館" }, { time: "16:15", desc: "MITSUI OUTLET 購物" }] },
             { day: "Day 6 | 賦歸 (5/22)", events: [{ time: "10:00", desc: "仙台站周邊最後採買" }, { time: "14:30", desc: "前往仙台機場" }, { time: "17:20", desc: "班機起飛" }] }
