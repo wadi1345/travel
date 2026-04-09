@@ -6,24 +6,22 @@
     <title>🌸 仙台六日遊專屬地圖</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        /* 網頁的基本溫暖可愛風格設定 */
+        /* 基本溫暖可愛風格設定 */
         body {
             margin: 0;
             padding: 0;
             display: flex;
             height: 100vh;
             font-family: 'Helvetica Neue', Arial, 'Noto Sans TC', sans-serif;
-            background-color: #fdfaf6; /* 溫暖的米白色背景 */
-            color: #5a4b41; /* 柔和的深咖啡色字體 */
+            background-color: #fdfaf6;
+            color: #5a4b41;
         }
         
-        /* 左側地圖區塊 */
         #map {
             width: 60%;
             height: 100%;
         }
 
-        /* 右側行程區塊 */
         #sidebar {
             width: 40%;
             height: 100%;
@@ -31,35 +29,80 @@
             padding: 30px;
             box-sizing: border-box;
             background-color: #fff9f2;
-            border-left: 3px solid #ffdece; /* 柔和的橘粉色邊框 */
+            border-left: 3px solid #ffdece;
         }
 
         h1 {
-            color: #e27d60; /* 溫暖的鮭魚粉色標題 */
+            color: #e27d60;
             font-size: 24px;
             margin-top: 0;
-            border-bottom: 2px dashed #ffdece;
-            padding-bottom: 15px;
+            margin-bottom: 15px;
+            text-align: center;
         }
 
-        .day-container {
+        /* 標籤頁按鈕區塊 */
+        .tabs {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 2px dashed #ffdece;
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background-color: transparent;
+            border: none;
+            color: #bfa696;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background-color: #ffdece;
+            color: #5a4b41;
+        }
+
+        .tab-btn.active {
+            background-color: #e27d60;
+            color: white;
+            box-shadow: 0 2px 8px rgba(226, 125, 96, 0.3);
+        }
+
+        /* 標籤頁內容區塊 */
+        .tab-content {
+            display: none; /* 預設隱藏所有內容 */
+            animation: fadeIn 0.4s;
+        }
+
+        .tab-content.active {
+            display: block; /* 只顯示 active 的內容 */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 卡片風格 */
+        .card {
             background-color: #ffffff;
             border-radius: 15px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(226, 125, 96, 0.1); /* 淡淡的粉色陰影 */
-            transition: transform 0.2s;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(226, 125, 96, 0.1);
         }
 
-        .day-container:hover {
-            transform: translateY(-2px);
-        }
-
-        .day-title {
+        .card-title {
             font-size: 18px;
             font-weight: bold;
-            color: #85b09a; /* 清新的灰綠色 */
+            color: #85b09a;
             margin-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 5px;
         }
 
         ul {
@@ -76,8 +119,16 @@
             position: relative;
         }
 
-        li::before {
-            content: "🐾"; /* 可愛的小腳印裝飾 */
+        /* 小裝飾 */
+        .paw-list li::before {
+            content: "🐾";
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 12px;
+        }
+        .star-list li::before {
+            content: "✨";
             position: absolute;
             left: 0;
             top: 0;
@@ -86,7 +137,7 @@
         
         .time {
             font-weight: bold;
-            color: #e8a87c; /* 溫暖的焦糖色 */
+            color: #e8a87c;
             margin-right: 5px;
         }
     </style>
@@ -96,23 +147,87 @@
     <div id="map"></div>
 
     <div id="sidebar">
-        <h1>🌸 5/17~5/22 東北仙台之旅</h1>
-        <p style="font-size: 14px; color: #999;">點擊左側地圖標記，可以查看景點名稱喔！</p>
+        <h1>🌸 東北仙台之旅</h1>
         
-        <div id="itinerary"></div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('itinerary-tab', this)">📅 行程表</button>
+            <button class="tab-btn" onclick="switchTab('packing-tab', this)">🎒 必帶物品</button>
+            <button class="tab-btn" onclick="switchTab('food-tab', this)">🍱 美食推薦</button>
+            <button class="tab-btn" onclick="switchTab('gift-tab', this)">🎁 伴手禮</button>
+        </div>
+
+        <div id="itinerary-tab" class="tab-content active">
+            <p style="font-size: 13px; color: #999; text-align: center; margin-top: 0;">點擊左側地圖標記，可以查看景點位置喔！</p>
+            <div id="itinerary-list"></div>
+        </div>
+
+        <div id="packing-tab" class="tab-content">
+            <div class="card">
+                <div class="card-title">👕 衣物與穿搭 (5月中下旬)</div>
+                <ul class="star-list">
+                    <li><b>洋蔥式穿法：</b> 白天約 18-22 度很舒適，但早晚溫差大，記得帶一件輕薄防風外套。</li>
+                    <li><b>好穿的平底鞋：</b> 瑞鳳殿和青葉城都有上坡跟階梯，會走滿多路的喔！</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-title">🎒 實用小物</div>
+                <ul class="star-list">
+                    <li><b>大容量環保袋：</b> 去 SEIYU 超市跟 OUTLET 大採購必備。</li>
+                    <li><b>零錢包與現金：</b> 仙台朝市、大崎八幡宮買御守、以及部分小店只收現金。</li>
+                    <li><b>行動電源：</b> 拍照、導航超耗電，一定要隨身帶。</li>
+                    <li><b>腸胃藥/常備藥：</b> 吃太多海鮮或生冷食物時可以備用。</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="food-tab" class="tab-content">
+            <div class="card">
+                <div class="card-title">🥩 必吃特色料理</div>
+                <ul class="star-list">
+                    <li><b>厚切牛舌：</b> 仙台靈魂美食！行程安排了「伊達の牛たん本舗」，記得點厚切芯舌最軟嫩。</li>
+                    <li><b>毛豆泥麻糬 (ずんだ餅)：</b> 必吃甜點，毛豆奶昔也超級推薦（仙台站內就有賣）。</li>
+                    <li><b>烤牡蠣：</b> 松島魚市場與周邊老街，現烤的鮮甜多汁，也可以試試牡蠣咖哩麵包。</li>
+                    <li><b>在地壽司：</b> 鹽釜港是日本金槍魚捕獲量極高的地方，當地的壽司鮮度破表！</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="gift-tab" class="tab-content">
+            <div class="card">
+                <div class="card-title">🛍️ 超人氣名產</div>
+                <ul class="star-list">
+                    <li><b>萩之月 (萩の月)：</b> 仙台最著名的經典伴手禮，裡面包著濃郁卡士達醬的鬆軟蛋糕。</li>
+                    <li><b>笹蒲鉾 (竹葉魚板)：</b> 行程中有安排去 DIY，吃不夠的話仙台站買冷藏的回去配酒超讚。</li>
+                    <li><b>浦霞 清酒：</b> 在鹽釜當地的酒造試飲後，喜歡的話直接買一瓶當地限定款。</li>
+                    <li><b>白萩 (白松がモナカ)：</b> 傳統的日式最中餅，包著紅豆或芝麻餡，很適合配茶。</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // 初始化地圖，中心點設定在仙台車站附近
-        const map = L.map('map').setView([38.2601, 140.8824], 11);
+        // --- 標籤頁切換功能 ---
+        function switchTab(tabId, btnElement) {
+            // 隱藏所有內容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // 取消所有按鈕的活躍狀態
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // 顯示點擊的內容和按鈕
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+        }
 
-        // 使用免費開源的 OpenStreetMap 圖資
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
+        // --- 地圖初始化 ---
+        const map = L.map('map').setView([38.2601, 140.8824], 11);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CARTO'
         }).addTo(map);
 
-        // 幫你標記的重要景點座標資料庫
         const locations = [
             { name: "仙台機場", lat: 38.1397, lng: 140.9170, day: "Day 1 & 6" },
             { name: "仙台站", lat: 38.2601, lng: 140.8824, day: "多日必經" },
@@ -120,90 +235,38 @@
             { name: "仙台朝市", lat: 38.2584, lng: 140.8789, day: "Day 2" },
             { name: "瑞鳳殿", lat: 38.2515, lng: 140.8676, day: "Day 2" },
             { name: "青葉城跡", lat: 38.2526, lng: 140.8543, day: "Day 2" },
-            { name: "松島海岸 (五大堂/福浦橋)", lat: 38.3686, lng: 141.0594, day: "Day 3" },
+            { name: "松島海岸 (五大堂)", lat: 38.3686, lng: 141.0594, day: "Day 3" },
             { name: "八木山動物公園", lat: 38.2447, lng: 140.8385, day: "Day 4" },
             { name: "麒麟啤酒仙台工廠", lat: 38.2758, lng: 140.9934, day: "Day 5" },
             { name: "仙台うみの杜水族館", lat: 38.2721, lng: 140.9855, day: "Day 5" },
-            { name: "MITSUI OUTLET PARK 仙台港", lat: 38.2711, lng: 140.9996, day: "Day 5" }
+            { name: "OUTLET 仙台港", lat: 38.2711, lng: 140.9996, day: "Day 5" }
         ];
 
-        // 將地標加到地圖上
         locations.forEach(loc => {
             L.marker([loc.lat, loc.lng]).addTo(map)
                 .bindPopup(`<b>${loc.name}</b><br>${loc.day}`);
         });
 
-        // 你的詳細行程資料
+        // --- 行程資料生成 ---
         const itineraryData = [
-            {
-                day: "Day 1 | 抵達 (5/17)",
-                events: [
-                    { time: "11:35 - 16:00", desc: "搭乘星宇航空 JX862 抵達仙台" },
-                    { time: "16:00 - 18:30", desc: "搭乘 Access 線至仙台站，轉乘至鹽釜站前往 Airbnb" },
-                    { time: "18:30 - 19:30", desc: "晚餐：鹽釜港/本鹽釜站周邊享用壽司或海鮮" }
-                ]
-            },
-            {
-                day: "Day 2 | 仙台市區歷史 + 朝市 + 夜景",
-                events: [
-                    { time: "09:00 - 10:30", desc: "仙台朝市（品嚐海鮮丼）" },
-                    { time: "11:00 - 11:40", desc: "瑞鳳殿（搭乘觀光巴士）" },
-                    { time: "12:00 - 12:50", desc: "青葉城跡" },
-                    { time: "15:30 - 17:30", desc: "市區自由活動（Loft / PARCO / 仙台站周邊）" },
-                    { time: "17:30 - 19:00", desc: "晚餐：伊達の牛たん本舗（厚切牛舌）" },
-                    { time: "19:15 - 20:00", desc: "AER 展望台欣賞百萬夜景" }
-                ]
-            },
-            {
-                day: "Day 3 | 松島一日遊",
-                events: [
-                    { time: "10:00 - 11:00", desc: "福浦橋與五大堂散策" },
-                    { time: "11:15 - 12:45", desc: "午餐：松島魚市場" },
-                    { time: "13:00 - 13:30", desc: "魚板 DIY 體驗（松島蒲鉾本舗）" },
-                    { time: "14:45 - 15:30", desc: "觀瀾亭享用抹茶套餐與海景" },
-                    { time: "16:00 - 17:00", desc: "SEIYU (西友) 鹽釜店採買和牛" },
-                    { time: "18:00 之後", desc: "民宿火鍋大餐" }
-                ]
-            },
-            {
-                day: "Day 4 | 動物園 + 清酒體驗",
-                events: [
-                    { time: "10:00 - 13:00", desc: "八木山動物公園" },
-                    { time: "13:00 - 14:30", desc: "午餐：仙台站內牛舌通/壽司通" },
-                    { time: "15:30 - 16:45", desc: "浦霞 酒Gallery 了解釀造歷史與清酒試飲" },
-                    { time: "17:30 之後", desc: "晚餐：鹽釜在地壽司店或自煮" }
-                ]
-            },
-            {
-                day: "Day 5 | 啤酒 × 水族館 × OUTLET",
-                events: [
-                    { time: "09:20 - 11:30", desc: "麒麟啤酒 (KIRIN) 仙台工廠參觀與試飲" },
-                    { time: "13:15 - 16:15", desc: "仙台うみの杜水族館" },
-                    { time: "16:15 - 18:30", desc: "MITSUI OUTLET PARK 仙台港購物" },
-                    { time: "18:30 - 19:30", desc: "晚餐：OUTLET 內或周邊餐廳" }
-                ]
-            },
-            {
-                day: "Day 6 | 市區購物 → 機場",
-                events: [
-                    { time: "10:00 - 13:00", desc: "仙台站周邊購物與採買伴手禮" },
-                    { time: "14:30 - 15:00", desc: "搭乘仙台機場線抵達機場" },
-                    { time: "17:20", desc: "班機起飛返台" }
-                ]
-            }
+            { day: "Day 1 | 抵達 (5/17)", events: [{ time: "11:35", desc: "搭乘星宇航空抵達" }, { time: "16:00", desc: "搭車前往鹽釜 Airbnb" }, { time: "18:30", desc: "晚餐：本鹽釜周邊海鮮" }] },
+            { day: "Day 2 | 歷史與夜景", events: [{ time: "09:00", desc: "仙台朝市" }, { time: "11:00", desc: "瑞鳳殿" }, { time: "12:00", desc: "青葉城跡" }, { time: "17:30", desc: "伊達の牛たん本舗" }, { time: "19:15", desc: "AER 展望台夜景" }] },
+            { day: "Day 3 | 松島一日遊", events: [{ time: "10:00", desc: "五大堂與福浦橋" }, { time: "11:15", desc: "松島魚市場午餐" }, { time: "13:00", desc: "魚板 DIY 體驗" }, { time: "16:00", desc: "SEIYU 超市採買和牛" }] },
+            { day: "Day 4 | 動物園與清酒", events: [{ time: "10:00", desc: "八木山動物公園" }, { time: "15:30", desc: "浦霞 酒Gallery" }, { time: "17:30", desc: "晚餐：鹽釜在地壽司店" }] },
+            { day: "Day 5 | 水族館與購物", events: [{ time: "09:20", desc: "麒麟啤酒工廠" }, { time: "13:15", desc: "仙台うみの杜水族館" }, { time: "16:15", desc: "MITSUI OUTLET 購物" }] },
+            { day: "Day 6 | 賦歸 (5/22)", events: [{ time: "10:00", desc: "仙台站周邊最後採買" }, { time: "14:30", desc: "前往仙台機場" }, { time: "17:20", desc: "班機起飛" }] }
         ];
 
-        // 將行程自動生成到網頁右側
-        const itineraryContainer = document.getElementById('itinerary');
+        const itineraryList = document.getElementById('itinerary-list');
         itineraryData.forEach(dayInfo => {
-            let dayHtml = `<div class="day-container">
-                               <div class="day-title">${dayInfo.day}</div>
-                               <ul>`;
+            let dayHtml = `<div class="card">
+                               <div class="card-title">${dayInfo.day}</div>
+                               <ul class="paw-list">`;
             dayInfo.events.forEach(event => {
                 dayHtml += `<li><span class="time">${event.time}</span> ${event.desc}</li>`;
             });
             dayHtml += `</ul></div>`;
-            itineraryContainer.innerHTML += dayHtml;
+            itineraryList.innerHTML += dayHtml;
         });
     </script>
 </body>
