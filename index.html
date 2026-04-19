@@ -79,6 +79,27 @@
             outline: none !important;
             border: none !important;
         }
+        /* 📍 Google 地圖專屬橘色導航按鈕 */
+        .place-btn { 
+            display: block; 
+            background-color: #e27d60 !important; 
+            color: #ffffff !important; 
+            padding: 10px 0 !important; 
+            border-radius: 8px !important; 
+            text-align: center !important; 
+            text-decoration: none !important; 
+            font-weight: bold !important; 
+            font-size: 14px !important; 
+            margin-top: 12px !important; 
+            transition: all 0.2s ease !important; 
+            box-shadow: 0 3px 6px rgba(226, 125, 96, 0.3) !important;
+            letter-spacing: 1px;
+        }
+        .place-btn:hover { 
+            background-color: #c8684d !important; 
+            transform: translateY(-2px) !important;
+            box-shadow: 0 5px 10px rgba(226, 125, 96, 0.4) !important;
+        }
     </style>
 </head>
 <body>
@@ -342,7 +363,7 @@
                                         <div style="font-size:16px;font-weight:bold;margin-bottom:5px;">${loc.name}</div>
                                         <div style="display:flex;justify-content:space-between;margin-bottom:8px;">${rating} ${openStatus}</div>
                                         <div style="font-size:13px;color:#85b09a;font-weight:bold;">筆記：${loc.desc}</div>
-                                        <a href="${place.url}" target="_blank" class="place-btn">📍 在 Google 地圖開啟</a>
+                                       <a href="${place.url}" target="_blank" class="place-btn">📍 在 Google 地圖開啟</a>
                                     </div>
                                 `);
                             });
