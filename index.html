@@ -60,11 +60,24 @@
             .calc-btn { padding: 14px 0; font-size: 18px; }
         }
         
-      /* 縮小 Google Map 資訊泡泡的預設「叉叉」關閉按鈕 */
+     /* 縮小叉叉，並徹底移除滑鼠移過、點擊時的「方形框框與底色」 */
         .gm-ui-hover-effect {
-            transform: scale(0.7) !important; /* 將原本的叉叉按比例縮小到 70% */
-            top: 5px !important;              /* 稍微微調距離避免貼死邊緣 */
+            transform: scale(0.7) !important;
+            top: 5px !important;
             right: 5px !important;
+            background: transparent !important; /* 強制移除背景色 */
+            outline: none !important;           /* 移除點擊時的方形外框 */
+            border: none !important;            /* 移除任何邊線 */
+            box-shadow: none !important;        /* 移除陰影 */
+        }
+        
+        /* 確保滑鼠停留在上面或按下時，也不會跑出方形框框 */
+        .gm-ui-hover-effect:hover, 
+        .gm-ui-hover-effect:focus, 
+        .gm-ui-hover-effect:active {
+            background: transparent !important;
+            outline: none !important;
+            border: none !important;
         }
     </style>
 </head>
