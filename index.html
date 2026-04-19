@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🌸 仙台六日遊專屬地圖</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <title>🌸 仙台六日遊專屬地圖 (Google版)</title>
     <style>
         /* 基本溫暖可愛風格設定 */
         body { margin: 0; padding: 0; display: flex; height: 100vh; font-family: 'Helvetica Neue', Arial, 'Noto Sans TC', sans-serif; background-color: #fdfaf6; color: #5a4b41; flex-direction: row; }
@@ -32,136 +31,87 @@
         .check-list li::before { content: "✅"; position: absolute; left: 0; top: 0; font-size: 12px; }
         
         .time { font-weight: bold; color: #e8a87c; margin-right: 5px; }
-        
-        /* 可點擊的地標文字特效 */
         .loc-link { cursor: pointer; color: #e27d60; font-weight: bold; border-bottom: 2px dotted #e8a87c; padding-bottom: 2px; transition: all 0.2s; }
         .loc-link:hover { background-color: #ffdece; border-bottom-style: solid; border-radius: 3px; }
 
-        .legend { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 12px; line-height: 1.5; }
+        .legend { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 12px; line-height: 1.5; position: absolute; bottom: 30px; right: 10px; z-index: 1000; }
         .legend span { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
 
-        /* 🔥 更新：標準版計算機樣式 */
-        .calc-screen { background: #fdfaf6; padding: 15px; text-align: right; font-size: 32px; font-weight: bold; border-radius: 10px; border: 1px solid #ffdece; margin-bottom: 5px; overflow-x: auto; color: #5a4b41; letter-spacing: 1px; }
-        .calc-twd { text-align: right; color: #85b09a; font-size: 16px; margin-bottom: 15px; font-weight: bold; transition: all 0.2s; }
+        /* 計算機樣式 */
+        .calc-screen { background: #fdfaf6; padding: 15px; text-align: right; font-size: 32px; font-weight: bold; border-radius: 10px; border: 1px solid #ffdece; margin-bottom: 5px; overflow-x: auto; color: #5a4b41; }
+        .calc-twd { text-align: right; color: #85b09a; font-size: 16px; margin-bottom: 15px; font-weight: bold; }
         .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .calc-btn { padding: 16px 0; font-size: 20px; background: #ffffff; border: 1px solid #ffdece; border-radius: 12px; color: #5a4b41; cursor: pointer; font-weight: bold; transition: 0.1s; box-shadow: 0 2px 4px rgba(226, 125, 96, 0.05); }
+        .calc-btn { padding: 16px 0; font-size: 20px; background: #ffffff; border: 1px solid #ffdece; border-radius: 12px; color: #5a4b41; cursor: pointer; font-weight: bold; box-shadow: 0 2px 4px rgba(226, 125, 96, 0.05); }
         .calc-btn:active { background: #ffdece; transform: translateY(2px); box-shadow: none; }
         .calc-op { color: #e27d60; background: #fff9f2; font-size: 24px; }
         .calc-eq { background: #e27d60; color: #ffffff; font-size: 24px; }
-        .calc-eq:active { background: #c8684d; }
         .calc-clear { color: #85b09a; background: #eef5f1; }
-        .calc-zero { grid-column: span 2; } /* 讓 0 鍵稍微寬一點 */
+        .calc-zero { grid-column: span 2; }
 
-        /* 手機版響應式設計 */
         @media (max-width: 768px) {
             body { flex-direction: column; }
             #map { width: 100%; height: 45vh; }
             #sidebar { width: 100%; height: 55vh; border-left: none; border-top: 3px solid #ffdece; padding: 15px; }
             h1 { font-size: 20px; }
-            .legend { font-size: 10px; padding: 5px; }
             .calc-btn { padding: 14px 0; font-size: 18px; }
         }
+        
+        /* 讓 Google Map 的資訊泡泡好看一點 */
+        .gm-style .gm-style-iw-c { border-radius: 12px; padding: 15px !important; }
+        .gm-style .gm-style-iw-d { overflow: hidden !important; }
     </style>
 </head>
 <body>
 
     <div id="map"></div>
+    <div class="legend">
+        <span style="background:#85b09a;"></span> 景點&交通<br>
+        <span style="background:#e27d60;"></span> 美食餐廳<br>
+        <span style="background:#c38eb4;"></span> 伴手禮
+    </div>
 
     <div id="sidebar">
         <h1>🌸 仙台六日遊</h1>
         
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('itinerary-tab', this)">📅 行程</button>
-            <button class="tab-btn" onclick="switchTab('packing-tab', this)">🎒 物品</button>
             <button class="tab-btn" onclick="switchTab('food-tab', this)">🍱 美食</button>
             <button class="tab-btn" onclick="switchTab('gift-tab', this)">🎁 伴手</button>
             <button class="tab-btn" onclick="switchTab('calc-tab', this)">🧮 算錢</button>
         </div>
 
         <div id="itinerary-tab" class="tab-content active">
-            <p style="font-size: 13px; color: #999; text-align: center; margin-top: 0;">點擊下方有虛線的地標，地圖會自動飛過去喔！</p>
+            <p style="font-size: 13px; color: #999; text-align: center; margin-top: 0;">點擊下方虛線地標，Google 地圖會自動導航過去喔！</p>
             <div id="itinerary-list"></div>
-        </div>
-
-        <div id="packing-tab" class="tab-content">
-            <div class="card">
-                <div class="card-title">🛂 重要證件與票券</div>
-                <ul class="check-list">
-                    <li><b>護照：</b> 效期需在6個月以上。</li>
-                    <li><b>數位入境碼：</b> 提前填寫好 Visit Japan Web 並截圖。</li>
-                    <li><b>機票與住宿：</b> 星宇航空電子機票、Airbnb 入住資訊。</li>
-                </ul>
-            </div>
-            <div class="card">
-                <div class="card-title">💰 財務與支付</div>
-                <ul class="check-list">
-                    <li><b>日幣現金：</b> 仙台朝市、大崎八幡宮、部分老街小吃必備。</li>
-                    <li><b>信用卡：</b> 帶 2-3 張高海外回饋卡片。</li>
-                    <li><b>交通卡：</b> 實體 Suica/Pasmo 或綁定 Apple Pay。</li>
-                </ul>
-            </div>
-            <div class="card">
-                <div class="card-title">📱 電子設備</div>
-                <ul class="check-list">
-                    <li><b>上網工具：</b> eSIM 卡或 Wi-Fi 機。</li>
-                    <li><b>行動電源：</b> 拍照導航極耗電，必帶。</li>
-                </ul>
-            </div>
-            <div class="card">
-                <div class="card-title">💊 隨身藥品與生活</div>
-                <ul class="check-list">
-                    <li><b>常備藥品：</b> 腸胃藥、感冒藥、止痛藥。</li>
-                    <li><b>衣物穿搭：</b> 5月中溫差大，帶輕薄防風外套。</li>
-                    <li><b>好走鞋子：</b> 景點階梯多，平底鞋非常重要。</li>
-                    <li><b>購物袋：</b> 西友超市和 OUTLET 採買必備。</li>
-                </ul>
-            </div>
         </div>
 
         <div id="food-tab" class="tab-content">
             <div class="card">
                 <div class="card-title">🍣 鹽釜在地海鮮與壽司</div>
                 <ul class="star-list">
-                    <li><span class="loc-link" onclick="focusMap('すし哲本店')">すし哲本店</span>：殿堂級名店，大目鮪魚極度推薦。</li>
-                    <li><span class="loc-link" onclick="focusMap('鮨しらはた')">鮨しらはた</span>：緊鄰すし哲，食材處理細膩。</li>
+                    <li><span class="loc-link" onclick="focusMap('すし哲本店')">すし哲本店</span>：大目鮪魚極度推薦。</li>
+                    <li><span class="loc-link" onclick="focusMap('鮨しらはた')">鮨しらはた</span>：食材處理細膩。</li>
                     <li><span class="loc-link" onclick="focusMap('廻鮮寿司塩釜港')">廻鮮寿司塩釜港</span>：東北最強迴轉壽司。</li>
                     <li><span class="loc-link" onclick="focusMap('亀喜寿司')">亀喜寿司</span>：老字號頂級壽司備案。</li>
                 </ul>
             </div>
             <div class="card">
-                <div class="card-title">🥩 燒肉、居酒屋與義式</div>
+                <div class="card-title">🥩 燒肉與特色料理</div>
                 <ul class="star-list">
-                    <li><span class="loc-link" onclick="focusMap('炭火焼肉 まさにく')">炭火焼肉 まさにく</span>：高CP值黑毛和牛與厚切牛舌。</li>
-                    <li><span class="loc-link" onclick="focusMap('まるきた')">まるきた</span>：隱藏版居酒屋，生魚片份量大。</li>
-                    <li><span class="loc-link" onclick="focusMap('Trattoria BLAIR MARINA')">BLAIR MARINA</span>：結合在地海鮮的義式料理。</li>
-                </ul>
-            </div>
-            <div class="card">
-                <div class="card-title">🍢 仙台與松島特色</div>
-                <ul class="star-list">
+                    <li><span class="loc-link" onclick="focusMap('炭火焼肉 まさにく')">炭火焼肉 まさにく</span>：高CP值黑毛和牛。</li>
                     <li><span class="loc-link" onclick="focusMap('伊達の牛たん本舗')">伊達の牛たん本舗</span>：必點極厚芯牛舌。</li>
-                    <li><span class="loc-link" onclick="focusMap('松島魚市場')">松島魚市場</span>：產地直送海鮮丼與現烤牡蠣。</li>
                     <li><span class="loc-link" onclick="focusMap('Pensee (パンセ)')">Pensee (パンセ)</span>：老街必吃牡蠣咖哩麵包。</li>
-                    <li><span class="loc-link" onclick="focusMap('Kirin Beer Port 仙台')">Kirin Beer Port 仙台</span>：啤酒廠附設的烤羊肉。</li>
                 </ul>
             </div>
         </div>
 
         <div id="gift-tab" class="tab-content">
             <div class="card">
-                <div class="card-title">🍰 經典名菓與甜點</div>
+                <div class="card-title">🎁 經典名菓與伴手禮</div>
                 <ul class="star-list">
-                    <li><span class="loc-link" onclick="focusMap('菓匠三全 (萩之月)')">萩之月 (菓匠三全)</span>：鬆軟蜂蜜蛋糕包裹卡士達醬。</li>
-                    <li><span class="loc-link" onclick="focusMap('ずんだ茶寮 / 喜久水庵')">喜久福 / ずんだ茶寮</span>：鮮奶油大福與毛豆奶昔。</li>
-                    <li><span class="loc-link" onclick="focusMap('仙台站')">白松最中</span>：傳統日式和菓子。</li>
-                </ul>
-            </div>
-            <div class="card">
-                <div class="card-title">🍘 鹹食與限定零嘴</div>
-                <ul class="star-list">
-                    <li><span class="loc-link" onclick="focusMap('仙台站')">牛舌製品 / KitKat / Saichi</span>：仙台限定零嘴。</li>
-                    <li><span class="loc-link" onclick="focusMap('松島蒲鉾本舗')">松島蒲鉾本舗</span>：仙台在地經典竹葉魚板。</li>
-                    <li><span class="loc-link" onclick="focusMap('浦霞 酒Gallery')">浦霞 酒Gallery</span>：鹽釜在地酒造限定酒款。</li>
+                    <li><span class="loc-link" onclick="focusMap('菓匠三全 (萩之月)')">萩之月 (菓匠三全)</span>：鬆軟蜂蜜蛋糕。</li>
+                    <li><span class="loc-link" onclick="focusMap('ずんだ茶寮 / 喜久水庵')">喜久福 / ずんだ茶寮</span>：大福與毛豆奶昔。</li>
+                    <li><span class="loc-link" onclick="focusMap('浦霞 酒Gallery')">浦霞 酒Gallery</span>：鹽釜酒造限定酒款。</li>
                 </ul>
             </div>
         </div>
@@ -174,7 +124,6 @@
                         匯率: <input type="number" id="exchange-rate" value="0.215" step="0.001" style="width: 55px; border: 1px solid #ccc; border-radius: 4px; padding: 2px;" onchange="calcUpdateScreen()">
                     </div>
                 </div>
-                
                 <div class="calc-screen" id="calc-screen">0</div>
                 <div class="calc-twd" id="calc-twd">約 0 TWD</div>
                 
@@ -203,98 +152,18 @@
                     <button class="calc-btn" onclick="inputDigit('00')">00</button>
                     <button class="calc-btn" onclick="inputDot()">.</button>
                 </div>
-
-                <div style="margin-top: 20px; border-top: 2px dashed #ffdece; padding-top: 15px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: bold; color: #5a4b41;">👨‍👩‍👧‍👦 分帳人數：</span>
-                        <span>
-                            <button onclick="changePeople(-1)" style="border:none; background:#ffdece; width:25px; border-radius:5px; cursor:pointer;">-</button>
-                            <input type="number" id="split-people" value="1" min="1" style="width: 40px; text-align: center; border: 1px solid #ccc; border-radius: 4px;" readonly>
-                            <button onclick="changePeople(1)" style="border:none; background:#85b09a; color:white; width:25px; border-radius:5px; cursor:pointer;">+</button>
-                        </span>
-                    </div>
-                    <div id="split-result" style="margin-top: 15px; font-weight: bold; color: #e27d60; font-size: 16px; text-align: center; background: #fff9f2; padding: 10px; border-radius: 8px; display: none;">
-                        </div>
-                </div>
             </div>
         </div>
 
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- 標籤切換與地圖邏輯維持不變 ---
         function switchTab(tabId, btnElement) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             btnElement.classList.add('active');
         }
-
-        const map = L.map('map').setView([38.2901, 140.9524], 11);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO' }).addTo(map);
-
-        const createMarker = (color) => {
-            const svgIcon = `<svg width="30" height="42" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.373 0 0 5.373 0 12c0 8.25 12 24 12 24s12-15.75 12-24C24 5.373 18.627 0 12 0zm0 17c-2.761 0-5-2.239-5-5s2.239-5 5-5 5 2.239 5 5-2.239 5-5 5z" fill="${color}" stroke="#ffffff" stroke-width="2"/></svg>`;
-            return L.divIcon({ className: 'custom-pin', html: svgIcon, iconSize: [30, 42], iconAnchor: [15, 42], popupAnchor: [0, -40] });
-        };
-        const icons = { general: createMarker('#85b09a'), food: createMarker('#e27d60'), gift: createMarker('#c38eb4') };
-        const markersDb = {};
-
-        const locations = [
-            { name: "仙台機場", lat: 38.1397, lng: 140.9170, type: "general", desc: "Day 1 & 6 班機起降" },
-            { name: "本鹽釜站", lat: 38.3175, lng: 141.0211, type: "general", desc: "每日起點與轉乘" },
-            { name: "仙台站", lat: 38.2601, lng: 140.8824, type: "general", desc: "交通與購物樞紐" },
-            { name: "瑞鳳殿", lat: 38.2515, lng: 140.8676, type: "general", desc: "歷史巡禮" },
-            { name: "青葉城跡", lat: 38.2526, lng: 140.8543, type: "general", desc: "伊達政宗騎馬銅像" },
-            { name: "大崎八幡宮", lat: 38.2714, lng: 140.8451, type: "general", desc: "國寶級神社" },
-            { name: "AER 展望台", lat: 38.2625, lng: 140.8815, type: "general", desc: "百萬市區夜景" },
-            { name: "五大堂 / 福浦橋", lat: 38.3686, lng: 141.0594, type: "general", desc: "日本三景散策" },
-            { name: "觀瀾亭", lat: 38.3692, lng: 141.0601, type: "general", desc: "賞海景吃抹茶" },
-            { name: "八木山動物公園", lat: 38.2447, lng: 140.8385, type: "general", desc: "看浣熊與北極熊" },
-            { name: "仙台うみの杜水族館", lat: 38.2721, lng: 140.9855, type: "general", desc: "海豚海獅表演" },
-            { name: "SEIYU (西友) 鹽釜店", lat: 38.3168, lng: 141.0225, type: "general", desc: "採買和牛與生鮮" },
-            { name: "すし哲本店", lat: 38.3182, lng: 141.0225, type: "food", desc: "殿堂級壽司！必吃大目鮪魚" },
-            { name: "鮨しらはた", lat: 38.3184, lng: 141.0223, type: "food", desc: "細膩壽司，搭日本酒絕配" },
-            { name: "廻鮮寿司塩釜港", lat: 38.3180, lng: 141.0285, type: "food", desc: "東北最強迴轉壽司(Marine Gate內)" },
-            { name: "亀喜寿司", lat: 38.3150, lng: 141.0230, type: "food", desc: "老字號精緻壽司" },
-            { name: "炭火焼肉 まさにく", lat: 38.3160, lng: 141.0205, type: "food", desc: "大口吃黑毛和牛與牛舌" },
-            { name: "まるきた", lat: 38.3165, lng: 141.0210, type: "food", desc: "在地海鮮居酒屋(週日有開)" },
-            { name: "Trattoria BLAIR MARINA", lat: 38.3178, lng: 141.0283, type: "food", desc: "義式海鮮料理與港口夜景" },
-            { name: "仙台朝市", lat: 38.2584, lng: 140.8789, type: "food", desc: "在地廚房，必吃豐盛海鮮丼" },
-            { name: "伊達の牛たん本舗", lat: 38.2615, lng: 140.8810, type: "food", desc: "厚切極致芯牛舌(仙台站前)" },
-            { name: "松島魚市場", lat: 38.3713, lng: 141.0628, type: "food", desc: "產地直送料理與現烤牡蠣" },
-            { name: "Pensee (パンセ)", lat: 38.3700, lng: 141.0615, type: "food", desc: "老街必買牡蠣咖哩麵包" },
-            { name: "Kirin Beer Port 仙台", lat: 38.2758, lng: 140.9934, type: "food", desc: "啤酒工廠直營，吃成吉思汗烤羊肉" },
-            { name: "菓匠三全 (萩之月)", lat: 38.2605, lng: 140.8820, type: "gift", desc: "仙台第一經典名菓(仙台站內)" },
-            { name: "ずんだ茶寮 / 喜久水庵", lat: 38.2608, lng: 140.8826, type: "gift", desc: "毛豆奶昔與大福(仙台站內)" },
-            { name: "松島蒲鉾本舗", lat: 38.3705, lng: 141.0610, type: "gift", desc: "現烤竹葉魚板DIY體驗" },
-            { name: "浦霞 酒Gallery", lat: 38.3168, lng: 141.0187, type: "gift", desc: "試飲買酒！在地純米大吟釀" },
-            { name: "MITSUI OUTLET PARK", lat: 38.2711, lng: 140.9996, type: "gift", desc: "東北最大血拼採購天地" }
-        ];
-
-        locations.forEach(loc => {
-            const marker = L.marker([loc.lat, loc.lng], { icon: icons[loc.type] }).addTo(map)
-                .bindPopup(`<b style="color:#5a4b41; font-size:14px;">${loc.name}</b><br><span style="color:#888;">${loc.desc}</span>`);
-            markersDb[loc.name] = marker;
-        });
-
-        function focusMap(name) {
-            const targetMarker = markersDb[name];
-            if (targetMarker) {
-                if (window.innerWidth <= 768) { window.scrollTo({ top: 0, behavior: 'smooth' }); }
-                map.flyTo(targetMarker.getLatLng(), 16, { duration: 1 });
-                targetMarker.openPopup();
-            }
-        }
-
-        const legend = L.control({position: 'bottomright'});
-        legend.onAdd = function () {
-            const div = L.DomUtil.create('div', 'legend');
-            div.innerHTML = `<span style="background:#85b09a;"></span> 景點<br><span style="background:#e27d60;"></span> 美食<br><span style="background:#c38eb4;"></span> 伴手禮`;
-            return div;
-        };
-        legend.addTo(map);
 
         const itineraryData = [
             { day: "Day 1 | 抵達 (5/17)", events: [
@@ -306,34 +175,20 @@
                 { time: "11:00 - 11:40", desc: `<span class="loc-link" onclick="focusMap('瑞鳳殿')">瑞鳳殿</span>（搭乘觀光巴士）` }, 
                 { time: "12:00 - 12:50", desc: `<span class="loc-link" onclick="focusMap('青葉城跡')">青葉城跡</span>` }, 
                 { time: "14:15 - 15:00", desc: `<span class="loc-link" onclick="focusMap('大崎八幡宮')">大崎八幡宮</span>` }, 
-                { time: "15:30 - 17:30", desc: `市區自由活動（仙台站周邊）` }, 
                 { time: "17:30 - 19:00", desc: `晚餐：<span class="loc-link" onclick="focusMap('伊達の牛たん本舗')">伊達の牛たん本舗</span>` }, 
                 { time: "19:15 - 20:00", desc: `<span class="loc-link" onclick="focusMap('AER 展望台')">AER 展望台</span> 欣賞百萬夜景` }] },
             { day: "Day 3 | 松島一日遊", events: [
-                { time: "09:30 - 09:45", desc: `搭仙石線：本鹽釜站 → 松島海岸站` }, 
                 { time: "10:00 - 11:00", desc: `<span class="loc-link" onclick="focusMap('五大堂 / 福浦橋')">福浦橋與五大堂</span> 散策` }, 
                 { time: "11:15 - 12:45", desc: `午餐：<span class="loc-link" onclick="focusMap('松島魚市場')">松島魚市場</span>（海鮮丼、烤牡蠣）` }, 
-                { time: "13:00 - 13:30", desc: `魚板 DIY 體驗（<span class="loc-link" onclick="focusMap('松島蒲鉾本舗')">松島蒲鉾本舗</span>）` }, 
                 { time: "13:30 - 14:30", desc: `老街美食（推薦 <span class="loc-link" onclick="focusMap('Pensee (パンセ)')">Pensee 牡蠣咖哩麵包</span>）` }, 
                 { time: "14:45 - 15:30", desc: `<span class="loc-link" onclick="focusMap('觀瀾亭')">觀瀾亭</span> 享用抹茶套餐與海景` }, 
-                { time: "16:00 - 17:00", desc: `<span class="loc-link" onclick="focusMap('SEIYU (西友) 鹽釜店')">SEIYU (西友) 鹽釜店</span> 採買和牛` }, 
-                { time: "18:00 之後", desc: `民宿火鍋大餐` }] },
-            { day: "Day 4 | 動物園與清酒", events: [
+                { time: "16:00 - 17:00", desc: `<span class="loc-link" onclick="focusMap('SEIYU (西友) 鹽釜店')">SEIYU (西友) 鹽釜店</span> 採買和牛` }] },
+            { day: "Day 4 & 5 | 動物園、清酒與OUTLET", events: [
                 { time: "10:00 - 13:00", desc: `搭車前往 <span class="loc-link" onclick="focusMap('八木山動物公園')">八木山動物公園</span>` }, 
-                { time: "13:00 - 14:30", desc: `午餐：仙台站內牛舌通/壽司通` }, 
                 { time: "15:30 - 16:45", desc: `<span class="loc-link" onclick="focusMap('浦霞 酒Gallery')">浦霞 酒Gallery</span> 清酒試飲` }, 
-                { time: "17:30 之後", desc: `晚餐：鹽釜在地壽司店（如 <span class="loc-link" onclick="focusMap('すし哲本店')">すし哲</span>）` }] },
-            { day: "Day 5 | 水族館與 OUTLET", events: [
-                { time: "09:20 - 11:30", desc: `搭接駁車至麒麟啤酒工廠參觀與試飲` }, 
-                { time: "11:30 - 13:00", desc: `午餐：<span class="loc-link" onclick="focusMap('Kirin Beer Port 仙台')">Kirin Beer Port 仙台</span>` }, 
-                { time: "13:15 - 16:15", desc: `步行前往 <span class="loc-link" onclick="focusMap('仙台うみの杜水族館')">仙台うみの杜水族館</span>` }, 
-                { time: "16:15 - 18:30", desc: `步行前往 <span class="loc-link" onclick="focusMap('MITSUI OUTLET PARK')">MITSUI OUTLET PARK</span> 購物` }, 
-                { time: "19:30 - 19:45", desc: `中野榮站 → 本鹽釜站休息` }] },
-            { day: "Day 6 | 賦歸 (5/22)", events: [
-                { time: "07:30 - 09:00", desc: `民宿早餐、退房` }, 
-                { time: "09:30 - 13:00", desc: `前往 <span class="loc-link" onclick="focusMap('仙台站')">仙台站</span> 寄行李與採買伴手禮` }, 
-                { time: "14:30 - 15:00", desc: `搭乘機場線抵達 <span class="loc-link" onclick="focusMap('仙台機場')">仙台機場</span>` }, 
-                { time: "17:20", desc: `班機起飛返台` }] }
+                { time: "17:30 之後", desc: `晚餐：鹽釜在地壽司店（如 <span class="loc-link" onclick="focusMap('すし哲本店')">すし哲</span>）` },
+                { time: "隔日 13:15", desc: `步行前往 <span class="loc-link" onclick="focusMap('仙台うみの杜水族館')">仙台うみの杜水族館</span>` }, 
+                { time: "隔日 16:15", desc: `步行前往 <span class="loc-link" onclick="focusMap('MITSUI OUTLET PARK')">MITSUI OUTLET PARK</span> 購物` }] }
         ];
 
         const itineraryList = document.getElementById('itinerary-list');
@@ -344,129 +199,115 @@
             itineraryList.innerHTML += dayHtml;
         });
 
-        // --- 🔥 升級版計算機大腦：狀態機邏輯 ---
-        let displayValue = '0';
-        let previousValue = null;
-        let currentOperator = null;
-        let waitingForNewValue = false;
-        let currentJpyForTwd = 0;
+        // 計算機邏輯
+        let displayValue = '0', previousValue = null, currentOperator = null, waitingForNewValue = false, currentJpyForTwd = 0;
+        function updateScreenDisplay() { document.getElementById("calc-screen").innerText = displayValue; currentJpyForTwd = parseFloat(displayValue) || 0; calcUpdateScreen(); }
+        function inputDigit(digit) { if (waitingForNewValue) { displayValue = String(digit); waitingForNewValue = false; } else { displayValue = displayValue === '0' && digit !== '00' ? String(digit) : displayValue + digit; } updateScreenDisplay(); }
+        function inputDot() { if (waitingForNewValue) { displayValue = '0.'; waitingForNewValue = false; updateScreenDisplay(); return; } if (!displayValue.includes('.')) { displayValue += '.'; updateScreenDisplay(); } }
+        function inputBackspace() { if (waitingForNewValue) return; displayValue = displayValue.slice(0, -1); if (displayValue === '') displayValue = '0'; updateScreenDisplay(); }
+        function inputClear() { displayValue = '0'; previousValue = null; currentOperator = null; waitingForNewValue = false; updateScreenDisplay(); }
+        function calculate(first, second, operator) { if (operator === '+') return first + second; if (operator === '-') return first - second; if (operator === '*') return first * second; if (operator === '/') return first / second; return second; }
+        function inputOperator(nextOperator) { const inputValue = parseFloat(displayValue); if (currentOperator && waitingForNewValue) { currentOperator = nextOperator; return; } if (previousValue == null) { previousValue = inputValue; } else if (currentOperator) { const result = calculate(previousValue, inputValue, currentOperator); displayValue = String(Math.round(result)); previousValue = result; updateScreenDisplay(); } waitingForNewValue = true; currentOperator = nextOperator; }
+        function inputEquals() { if (!currentOperator || waitingForNewValue) return; const inputValue = parseFloat(displayValue); const result = calculate(previousValue, inputValue, currentOperator); displayValue = String(Math.round(result)); previousValue = null; currentOperator = null; waitingForNewValue = true; updateScreenDisplay(); }
+        function calcUpdateScreen() { const rate = parseFloat(document.getElementById("exchange-rate").value) || 0.215; const twd = Math.round(currentJpyForTwd * rate); document.getElementById("calc-twd").innerText = `約 ${twd} TWD`; }
+    </script>
 
-        function updateScreenDisplay() {
-            document.getElementById("calc-screen").innerText = displayValue;
-            currentJpyForTwd = parseFloat(displayValue) || 0;
-            calcUpdateScreen();
+    <script>
+        let map;
+        let infoWindow;
+        let markersDb = {};
+
+        // 定義自訂的 Google Maps 圖釘顏色
+        const pinColors = { general: "#85b09a", food: "#e27d60", gift: "#c38eb4" };
+
+        const locations = [
+            { name: "仙台機場", lat: 38.1397, lng: 140.9170, type: "general", desc: "Day 1 & 6 班機起降<br><a href='https://maps.google.com/?q=38.1397,140.9170' target='_blank' style='color:#e27d60;'>📍 在Google地圖開啟</a>" },
+            { name: "本鹽釜站", lat: 38.3175, lng: 141.0211, type: "general", desc: "每日起點與轉乘" },
+            { name: "仙台站", lat: 38.2601, lng: 140.8824, type: "general", desc: "交通與購物樞紐" },
+            { name: "瑞鳳殿", lat: 38.2515, lng: 140.8676, type: "general", desc: "歷史巡禮" },
+            { name: "青葉城跡", lat: 38.2526, lng: 140.8543, type: "general", desc: "伊達政宗騎馬銅像" },
+            { name: "大崎八幡宮", lat: 38.2714, lng: 140.8451, type: "general", desc: "國寶級神社" },
+            { name: "AER 展望台", lat: 38.2625, lng: 140.8815, type: "general", desc: "百萬市區夜景" },
+            { name: "五大堂 / 福浦橋", lat: 38.3686, lng: 141.0594, type: "general", desc: "日本三景散策" },
+            { name: "觀瀾亭", lat: 38.3692, lng: 141.0601, type: "general", desc: "賞海景吃抹茶" },
+            { name: "八木山動物公園", lat: 38.2447, lng: 140.8385, type: "general", desc: "看浣熊與北極熊" },
+            { name: "仙台うみの杜水族館", lat: 38.2721, lng: 140.9855, type: "general", desc: "海豚海獅表演" },
+            { name: "SEIYU (西友) 鹽釜店", lat: 38.3168, lng: 141.0225, type: "general", desc: "採買和牛與生鮮" },
+            { name: "すし哲本店", lat: 38.3182, lng: 141.0225, type: "food", desc: "殿堂級壽司！必吃大目鮪魚<br>🍣 評分極高，建議提早去" },
+            { name: "鮨しらはた", lat: 38.3184, lng: 141.0223, type: "food", desc: "細膩壽司，搭日本酒絕配" },
+            { name: "廻鮮寿司塩釜港", lat: 38.3180, lng: 141.0285, type: "food", desc: "東北最強迴轉壽司" },
+            { name: "亀喜寿司", lat: 38.3150, lng: 141.0230, type: "food", desc: "老字號精緻壽司" },
+            { name: "炭火焼肉 まさにく", lat: 38.3160, lng: 141.0205, type: "food", desc: "大口吃黑毛和牛與牛舌" },
+            { name: "まるきた", lat: 38.3165, lng: 141.0210, type: "food", desc: "在地海鮮居酒屋(週日有開)" },
+            { name: "Trattoria BLAIR MARINA", lat: 38.3178, lng: 141.0283, type: "food", desc: "義式海鮮料理與港口夜景" },
+            { name: "仙台朝市", lat: 38.2584, lng: 140.8789, type: "food", desc: "在地廚房，必吃豐盛海鮮丼" },
+            { name: "伊達の牛たん本舗", lat: 38.2615, lng: 140.8810, type: "food", desc: "厚切極致芯牛舌" },
+            { name: "松島魚市場", lat: 38.3713, lng: 141.0628, type: "food", desc: "產地直送料理與現烤牡蠣" },
+            { name: "Pensee (パンセ)", lat: 38.3700, lng: 141.0615, type: "food", desc: "老街必買牡蠣咖哩麵包" },
+            { name: "菓匠三全 (萩之月)", lat: 38.2605, lng: 140.8820, type: "gift", desc: "仙台第一經典名菓(仙台站內)" },
+            { name: "ずんだ茶寮 / 喜久水庵", lat: 38.2608, lng: 140.8826, type: "gift", desc: "毛豆奶昔與大福(仙台站內)" },
+            { name: "浦霞 酒Gallery", lat: 38.3168, lng: 141.0187, type: "gift", desc: "試飲買酒！在地純米大吟釀" },
+            { name: "MITSUI OUTLET PARK", lat: 38.2711, lng: 140.9996, type: "gift", desc: "東北最大血拼採購天地" }
+        ];
+
+        // 這是 Google Maps API 載入後會自動呼叫的函數
+        function initMap() {
+            // 建立地圖
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 38.2901, lng: 140.9524 },
+                zoom: 11,
+                mapTypeControl: false, // 隱藏衛星圖切換讓版面乾淨
+                streetViewControl: false // 隱藏街景小人
+            });
+
+            // 建立一個共用的資訊視窗
+            infoWindow = new google.maps.InfoWindow();
+
+            // 把地點加到地圖上
+            locations.forEach(loc => {
+                // 為了自訂顏色，我們使用 SVG 畫一個圖釘
+                const svgMarker = {
+                    path: "M12 0C5.373 0 0 5.373 0 12c0 8.25 12 24 12 24s12-15.75 12-24C24 5.373 18.627 0 12 0zm0 17c-2.761 0-5-2.239-5-5s2.239-5 5-5 5 2.239 5 5-2.239 5-5 5z",
+                    fillColor: pinColors[loc.type],
+                    fillOpacity: 1,
+                    strokeWeight: 2,
+                    strokeColor: "#ffffff",
+                    scale: 1.2,
+                    anchor: new google.maps.Point(12, 36)
+                };
+
+                const marker = new google.maps.Marker({
+                    position: { lat: loc.lat, lng: loc.lng },
+                    map: map,
+                    title: loc.name,
+                    icon: svgMarker
+                });
+
+                // 點擊圖釘時打開資訊視窗
+                marker.addListener("click", () => {
+                    infoWindow.setContent(`<div style="padding:5px;"><b style="color:#5a4b41; font-size:16px;">${loc.name}</b><br><span style="color:#888; font-size:13px; line-height:1.5; display:inline-block; margin-top:5px;">${loc.desc}</span></div>`);
+                    infoWindow.open(map, marker);
+                });
+
+                // 存起來給左邊選單點擊使用
+                markersDb[loc.name] = marker;
+            });
         }
 
-        function inputDigit(digit) {
-            if (waitingForNewValue) {
-                displayValue = String(digit);
-                waitingForNewValue = false;
-            } else {
-                displayValue = displayValue === '0' && digit !== '00' ? String(digit) : displayValue + digit;
-            }
-            updateScreenDisplay();
-        }
-
-        function inputDot() {
-            if (waitingForNewValue) {
-                displayValue = '0.';
-                waitingForNewValue = false;
-                updateScreenDisplay();
-                return;
-            }
-            if (!displayValue.includes('.')) {
-                displayValue += '.';
-                updateScreenDisplay();
-            }
-        }
-
-        function inputBackspace() {
-            if (waitingForNewValue) return;
-            displayValue = displayValue.slice(0, -1);
-            if (displayValue === '') displayValue = '0';
-            updateScreenDisplay();
-        }
-
-        function inputClear() {
-            displayValue = '0';
-            previousValue = null;
-            currentOperator = null;
-            waitingForNewValue = false;
-            updateScreenDisplay();
-        }
-
-        function calculate(first, second, operator) {
-            if (operator === '+') return first + second;
-            if (operator === '-') return first - second;
-            if (operator === '*') return first * second;
-            if (operator === '/') return first / second;
-            return second;
-        }
-
-        // 🔥 這裡就是連加即時運算的魔法
-        function inputOperator(nextOperator) {
-            const inputValue = parseFloat(displayValue);
-
-            if (currentOperator && waitingForNewValue) {
-                // 如果連續按了不同的運算符號（例如按完 + 又按 -），只替換符號
-                currentOperator = nextOperator;
-                return;
-            }
-
-            if (previousValue == null) {
-                // 第一次輸入數字後按運算符號
-                previousValue = inputValue;
-            } else if (currentOperator) {
-                // 已經有前面的數字和符號了，先結算目前的結果！
-                const result = calculate(previousValue, inputValue, currentOperator);
-                // 處理 JS 浮點數誤差並取整數 (日幣通常不看小數)
-                displayValue = String(Math.round(result)); 
-                previousValue = result;
-                updateScreenDisplay();
-            }
-
-            waitingForNewValue = true;
-            currentOperator = nextOperator;
-        }
-
-        function inputEquals() {
-            if (!currentOperator || waitingForNewValue) return;
-            const inputValue = parseFloat(displayValue);
-            const result = calculate(previousValue, inputValue, currentOperator);
-            displayValue = String(Math.round(result));
-            previousValue = null;
-            currentOperator = null;
-            waitingForNewValue = true;
-            updateScreenDisplay();
-        }
-
-        // --- 分帳與台幣換算 ---
-        function changePeople(amount) {
-            let peopleInput = document.getElementById("split-people");
-            let newVal = parseInt(peopleInput.value) + amount;
-            if (newVal >= 1) {
-                peopleInput.value = newVal;
-                calcUpdateScreen();
-            }
-        }
-
-        function calcUpdateScreen() {
-            const rate = parseFloat(document.getElementById("exchange-rate").value) || 0.215;
-            const twd = Math.round(currentJpyForTwd * rate);
-            document.getElementById("calc-twd").innerText = `約 ${twd} TWD`;
-
-            const people = parseInt(document.getElementById("split-people").value) || 1;
-            const splitDiv = document.getElementById("split-result");
-            
-            if (people > 1 && currentJpyForTwd > 0) {
-                const splitJpy = Math.round(currentJpyForTwd / people);
-                const splitTwd = Math.round(twd / people);
-                splitDiv.innerHTML = `每人應付：<br><span style="font-size:20px;">${splitJpy} JPY</span><br><span style="font-size:14px; color:#888;">(約 ${splitTwd} TWD)</span>`;
-                splitDiv.style.display = "block";
-            } else {
-                splitDiv.style.display = "none";
+        // 飛梭導航功能 (改寫為 Google Maps 版本)
+        function focusMap(name) {
+            const targetMarker = markersDb[name];
+            if (targetMarker) {
+                if (window.innerWidth <= 768) { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+                // 放大並移動到該位置
+                map.setZoom(16);
+                map.panTo(targetMarker.getPosition());
+                // 觸發該圖釘的點擊事件以打開泡泡
+                google.maps.event.trigger(targetMarker, 'click');
             }
         }
     </script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5XZ6F9yQEMgnuC0QZmtXBOb_Hav65xmc&callback=initMap"></script>
 </body>
 </html>
