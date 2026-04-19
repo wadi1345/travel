@@ -60,11 +60,12 @@
             .calc-btn { padding: 14px 0; font-size: 18px; }
         }
         
-        /* 美化 Google Map 泡泡與叉叉 */
-        .gm-style .gm-style-iw-c { border-radius: 15px !important; padding: 15px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important; }
-        .gm-ui-hover-effect { transform: scale(0.7) !important; top: 8px !important; right: 8px !important; background-color: #ffdece !important; border-radius: 50% !important; }
-        .gm-ui-hover-effect span { mask-image: none !important; -webkit-mask-image: none !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235a4b41' d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E") !important; background-size: contain !important; width: 18px !important; height: 18px !important; margin: auto !important; display: block !important; }
-        .place-btn { display: block; background: #e27d60; color: white !important; padding: 8px 0; border-radius: 8px; text-align: center; text-decoration: none; font-weight: bold; font-size: 14px; margin-top: 10px; transition: 0.2s; }
+      /* 縮小 Google Map 資訊泡泡的預設「叉叉」關閉按鈕 */
+        .gm-ui-hover-effect {
+            transform: scale(0.7) !important; /* 將原本的叉叉按比例縮小到 70% */
+            top: 5px !important;              /* 稍微微調距離避免貼死邊緣 */
+            right: 5px !important;
+        }
     </style>
 </head>
 <body>
