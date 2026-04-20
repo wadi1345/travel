@@ -323,36 +323,38 @@
 
                     placesService.findPlaceFromQuery({ query: loc.query, fields: ['place_id'] }, (results, status) => {
                         if (status === "OK" && results[0]) {
-                            placesService.getDetails({ placeId: results[0].place_id, fields: ['name', 'rating', 'photos', 'opening_hours', 'url', 'user_ratings_total'] }, (place, detailStatus) => {
-                                // 組合照片 (高度壓扁，防排擠按鈕)
-                                let photoHtml = '';
-                                if (place.photos && place.photos.length > 0) {
-                                    photoHtml = `<img src="${place.photos[0].getUrl({maxWidth: 300, maxHeight: 150})}" style="width:100%; height:90px; object-fit:cover; border-radius:8px; margin-bottom:6px;">`;
-                                } else {
-                                    photoHtml = `<div style="width:100%; height:70px; background:#ffdece; border-radius:8px; margin-bottom:6px; display:flex; align-items:center; justify-content:center; color:#e27d60; font-weight:bold; font-size:12px;">🌸 仙台之旅</div>`;
-                                }
+placesService.getDetails({ placeId: results[0].place_id, fields: ['name', 'rating', 'photos', 'opening_hours', 'url', 'user_ratings_total'] }, (place, detailStatus) => {
+                                // 1. 組合星星數
+                                let ratingHtml = place.rating ? `<span style="color:#fbbc04; font-size:13px;">★</span> <b style="font-size:13px; color:#5a4b41;">${place.rating}</b> <span style="color:#aaa; font-size:11px;">(${place.user_ratings_total})</span>` : '';
 
-                                // 組合星星數
-                                let ratingHtml = place.rating ? `<span style="color:#fbbc04; font-size:14px;">★</span> <b style="font-size:14px; color:#5a4b41;">${place.rating}</b> <span style="color:#aaa; font-size:11px;">(${place.user_ratings_total})</span>` : '';
-
-                                // 組合營業時間狀態
+                                // 2. 組合營業時間
                                 let openHtml = '';
                                 if (place.opening_hours) {
                                     const isOpen = place.opening_hours.isOpen();
                                     openHtml = isOpen ? `<span style="color:#188038; font-weight:bold; background:#e6f4ea; padding:2px 4px; border-radius:4px; font-size:11px;">🟢 營業中</span>` : `<span style="color:#d93025; font-weight:bold; background:#fce8e6; padding:2px 4px; border-radius:4px; font-size:11px;">🔴 休息中</span>`;
                                 }
 
-                                // 組裝緊湊版圖文卡片
+                                // 3. 組合照片 (稍微再縮小一點點，當作配圖)
+                                let photoHtml = '';
+                                if (place.photos && place.photos.length > 0) {
+                                    photoHtml = `<img src="${place.photos[0].getUrl({maxWidth: 250, maxHeight: 100})}" style="width:100%; height:75px; object-fit:cover; border-radius:8px; margin-top:8px; margin-bottom:4px;">`;
+                                }
+
+                                // 🔥 4. 終極防排擠版排版：按鈕拉到最上面！
                                 const finalHtml = `
-                                    <div style="width: 220px; font-family: 'Helvetica Neue', Arial, sans-serif;">
-                                        ${photoHtml}
-                                        <div style="font-size: 16px; font-weight: bold; color: #5a4b41; margin-bottom: 2px; line-height: 1.2;">${loc.name}</div>
-                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+                                    <div style="max-width: 200px; font-family: 'Helvetica Neue', Arial, sans-serif;">
+                                        <div style="font-size: 16px; font-weight: bold; color: #5a4b41; margin-bottom: 5px; line-height: 1.2;">${loc.name}</div>
+                                        
+                                        <a href="${place.url}" target="_blank" class="place-btn" style="margin-top: 0; margin-bottom: 8px; padding: 6px 0; font-size: 13px;">📍 在 Google 地圖導航</a>
+                                        
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2px;">
                                             <div>${ratingHtml}</div>
                                             <div>${openHtml}</div>
                                         </div>
-                                        <div style="font-size: 12px; color: #85b09a; margin-bottom: 8px; line-height: 1.3; font-weight:bold;">✍️ 筆記：${loc.desc}</div>
-                                        <a href="${place.url}" target="_blank" class="place-btn" style="margin-top: 0; padding: 6px 0;">📍 在 Google 地圖開啟</a>
+                                        
+                                        ${photoHtml}
+                                        
+                                        <div style="font-size: 12px; color: #85b09a; line-height: 1.3; font-weight:bold;">✍️ 筆記：${loc.desc}</div>
                                     </div>
                                 `;
                                 infoWindow.setContent(finalHtml);
