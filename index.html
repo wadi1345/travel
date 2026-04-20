@@ -269,6 +269,18 @@
         function inputEquals() { if (!currentOperator || waitingForNewValue) return; const inputValue = parseFloat(displayValue); const result = calculate(previousValue, inputValue, currentOperator); displayValue = String(Math.round(result)); previousValue = null; currentOperator = null; waitingForNewValue = true; updateScreenDisplay(); }
         function changePeople(amount) { let p = document.getElementById("split-people"); let val = parseInt(p.value) + amount; if (val >= 1) { p.value = val; calcUpdateScreen(); } }
         function calcUpdateScreen() { const rate = parseFloat(document.getElementById("exchange-rate").value) || 0.215; const twd = Math.round(currentJpyForTwd * rate); document.getElementById("calc-twd").innerText = `約 ${twd} TWD`; const people = parseInt(document.getElementById("split-people").value); const res = document.getElementById("split-result"); if (people > 1 && currentJpyForTwd > 0) { const sJ = Math.round(currentJpyForTwd / people); const sT = Math.round(twd / people); res.innerHTML = `每人應付：${sJ} JPY (約 ${sT} TWD)`; res.style.display = "block"; } else { res.style.display = "none"; } }
+
+        // 🔥 為側邊欄增加點擊事件，讓點擊空白處也能恢復原狀
+        document.getElementById('sidebar').addEventListener('click', function(e) {
+            // 如果點擊的不是連結、按鈕等互動元素，就視為點擊空白處
+            if (e.target === this || e.target.classList.contains('tab-content') || e.target.classList.contains('card')) {
+                if(document.body.classList.contains('map-expanded')){
+                    document.body.classList.remove('map-expanded');
+                    if(infoWindow) infoWindow.close();
+                }
+            }
+        });
+
     </script>
 
     <script>
