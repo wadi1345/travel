@@ -60,46 +60,16 @@
             .calc-btn { padding: 14px 0; font-size: 18px; }
         }
         
-     /* 縮小叉叉，並徹底移除滑鼠移過、點擊時的「方形框框與底色」 */
-        .gm-ui-hover-effect {
-            transform: scale(0.7) !important;
-            top: 5px !important;
-            right: 5px !important;
-            background: transparent !important; /* 強制移除背景色 */
-            outline: none !important;           /* 移除點擊時的方形外框 */
-            border: none !important;            /* 移除任何邊線 */
-            box-shadow: none !important;        /* 移除陰影 */
-        }
+        /* 🎀 Google Map 資訊泡泡圓角美化 */
+        .gm-style .gm-style-iw-c { border-radius: 15px !important; padding: 15px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important; }
         
-        /* 確保滑鼠停留在上面或按下時，也不會跑出方形框框 */
-        .gm-ui-hover-effect:hover, 
-        .gm-ui-hover-effect:focus, 
-        .gm-ui-hover-effect:active {
-            background: transparent !important;
-            outline: none !important;
-            border: none !important;
-        }
-        /* 📍 Google 地圖專屬橘色導航按鈕 */
-        .place-btn { 
-            display: block; 
-            background-color: #e27d60 !important; 
-            color: #ffffff !important; 
-            padding: 10px 0 !important; 
-            border-radius: 8px !important; 
-            text-align: center !important; 
-            text-decoration: none !important; 
-            font-weight: bold !important; 
-            font-size: 14px !important; 
-            margin-top: 12px !important; 
-            transition: all 0.2s ease !important; 
-            box-shadow: 0 3px 6px rgba(226, 125, 96, 0.3) !important;
-            letter-spacing: 1px;
-        }
-        .place-btn:hover { 
-            background-color: #c8684d !important; 
-            transform: translateY(-2px) !important;
-            box-shadow: 0 5px 10px rgba(226, 125, 96, 0.4) !important;
-        }
+        /* ❌ 縮小叉叉，並徹底移除滑鼠移過、點擊時的方形框框與底色 */
+        .gm-ui-hover-effect { transform: scale(0.7) !important; top: 5px !important; right: 5px !important; background: transparent !important; outline: none !important; border: none !important; box-shadow: none !important; }
+        .gm-ui-hover-effect:hover, .gm-ui-hover-effect:focus, .gm-ui-hover-effect:active { background: transparent !important; outline: none !important; border: none !important; }
+        
+        /* 📍 橘色導航按鈕回歸 */
+        .place-btn { display: block; background-color: #e27d60 !important; color: #ffffff !important; padding: 8px 0 !important; border-radius: 8px !important; text-align: center !important; text-decoration: none !important; font-weight: bold !important; font-size: 14px !important; margin-top: 8px !important; transition: all 0.2s ease !important; box-shadow: 0 3px 6px rgba(226, 125, 96, 0.3) !important; letter-spacing: 1px; }
+        .place-btn:hover { background-color: #c8684d !important; transform: translateY(-2px) !important; box-shadow: 0 5px 10px rgba(226, 125, 96, 0.4) !important; }
     </style>
 </head>
 <body>
@@ -353,19 +323,39 @@
 
                     placesService.findPlaceFromQuery({ query: loc.query, fields: ['place_id'] }, (results, status) => {
                         if (status === "OK" && results[0]) {
-                            placesService.getDetails({ placeId: results[0].place_id, fields: ['name', 'rating', 'photos', 'opening_hours', 'url'] }, (place, detailStatus) => {
-                                let photo = place.photos ? `<img src="${place.photos[0].getUrl({maxWidth: 300})}" style="width:100%;height:130px;object-fit:cover;border-radius:10px;margin-bottom:8px;">` : '';
-                                let openStatus = place.opening_hours ? (place.opening_hours.isOpen() ? '<span style="color:#188038;font-weight:bold;">🟢 營業中</span>' : '<span style="color:#d93025;font-weight:bold;">🔴 休息中</span>') : '';
-                                let rating = place.rating ? `⭐ <b>${place.rating}</b>` : '';
-                                infoWindow.setContent(`
-                                    <div style="width:230px;">
-                                        ${photo}
-                                        <div style="font-size:16px;font-weight:bold;margin-bottom:5px;">${loc.name}</div>
-                                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">${rating} ${openStatus}</div>
-                                        <div style="font-size:13px;color:#85b09a;font-weight:bold;">筆記：${loc.desc}</div>
-                                       <a href="${place.url}" target="_blank" class="place-btn">📍 在 Google 地圖開啟</a>
+                            placesService.getDetails({ placeId: results[0].place_id, fields: ['name', 'rating', 'photos', 'opening_hours', 'url', 'user_ratings_total'] }, (place, detailStatus) => {
+                                // 組合照片 (高度壓扁，防排擠按鈕)
+                                let photoHtml = '';
+                                if (place.photos && place.photos.length > 0) {
+                                    photoHtml = `<img src="${place.photos[0].getUrl({maxWidth: 300, maxHeight: 150})}" style="width:100%; height:90px; object-fit:cover; border-radius:8px; margin-bottom:6px;">`;
+                                } else {
+                                    photoHtml = `<div style="width:100%; height:70px; background:#ffdece; border-radius:8px; margin-bottom:6px; display:flex; align-items:center; justify-content:center; color:#e27d60; font-weight:bold; font-size:12px;">🌸 仙台之旅</div>`;
+                                }
+
+                                // 組合星星數
+                                let ratingHtml = place.rating ? `<span style="color:#fbbc04; font-size:14px;">★</span> <b style="font-size:14px; color:#5a4b41;">${place.rating}</b> <span style="color:#aaa; font-size:11px;">(${place.user_ratings_total})</span>` : '';
+
+                                // 組合營業時間狀態
+                                let openHtml = '';
+                                if (place.opening_hours) {
+                                    const isOpen = place.opening_hours.isOpen();
+                                    openHtml = isOpen ? `<span style="color:#188038; font-weight:bold; background:#e6f4ea; padding:2px 4px; border-radius:4px; font-size:11px;">🟢 營業中</span>` : `<span style="color:#d93025; font-weight:bold; background:#fce8e6; padding:2px 4px; border-radius:4px; font-size:11px;">🔴 休息中</span>`;
+                                }
+
+                                // 組裝緊湊版圖文卡片
+                                const finalHtml = `
+                                    <div style="width: 220px; font-family: 'Helvetica Neue', Arial, sans-serif;">
+                                        ${photoHtml}
+                                        <div style="font-size: 16px; font-weight: bold; color: #5a4b41; margin-bottom: 2px; line-height: 1.2;">${loc.name}</div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+                                            <div>${ratingHtml}</div>
+                                            <div>${openHtml}</div>
+                                        </div>
+                                        <div style="font-size: 12px; color: #85b09a; margin-bottom: 8px; line-height: 1.3; font-weight:bold;">✍️ 筆記：${loc.desc}</div>
+                                        <a href="${place.url}" target="_blank" class="place-btn" style="margin-top: 0; padding: 6px 0;">📍 在 Google 地圖開啟</a>
                                     </div>
-                                `);
+                                `;
+                                infoWindow.setContent(finalHtml);
                             });
                         }
                     });
